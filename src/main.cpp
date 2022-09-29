@@ -105,7 +105,7 @@ std::stack<glm::mat4>  g_MatrixStack;
 // Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
 
-// Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
+// Ângulos de Euler que controlam a rotação do bloco
 float g_AngleX = 0.0f;
 float g_AngleY = 0.0f;
 float g_AngleZ = 0.0f;
@@ -124,16 +124,9 @@ float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
 float g_CameraDistance = 3.5f; // Distância da câmera para a origem
 
-// Variáveis que controlam rotação do antebraço
-float g_ForearmAngleZ = 0.0f;
-float g_ForearmAngleX = 0.0f;
-
-// Variáveis que controlam translação do torso
-float g_TorsoPositionX = 0.0f;
-float g_TorsoPositionY = 0.0f;
+// Variáveis que controlam translação do bloco
 float g_PositionX = 0.0f;
 float g_PositionY = 0.0f;
-float g_PositionY_Horz = 0.0f;
 float g_PositionZ = 0.0f;
 
 // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
@@ -368,12 +361,13 @@ int main()
         // Guardamos matriz model atual na pilha
 
         PushMatrix(model); // Guardamos matriz model atual na pilha
-        model = model * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ); // Atualizamos matriz model (multiplicação à direita) com uma translação para o braço direito
+        model = model * Matrix_Translate(g_PositionX, 0, g_PositionZ); // Atualizamos matriz model (multiplicação à direita) com uma translação para o braço direito
         PushMatrix(model); // Guardamos matriz model atual na pilha
         model = model // Atualizamos matriz model (multiplicação à direita) com a rotação do braço direito
                 * Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
-                * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO rotação Y de Euler
+                * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
                 * Matrix_Rotate_X(g_AngleX); // PRIMEIRO rotação X de Euler
+        //model = model * Matrix_Translate(0, 1, g_PositionZ);
         PushMatrix(model); // Guardamos matriz model atual na pilha
         model = model * Matrix_Scale(0.8f, 2.0f, 0.8f); // Atualizamos matriz model (multiplicação à direita) com um escalamento do braço direito
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model)); // Enviamos matriz model atual para a GPU
@@ -1061,8 +1055,8 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         float dy = ypos - g_LastCursorPosY;
 
         // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_ForearmAngleZ -= 0.01f*dx;
-        g_ForearmAngleX += 0.01f*dy;
+        //g_ForearmAngleZ -= 0.01f*dx;
+        //g_ForearmAngleX += 0.01f*dy;
 
         // Atualizamos as variáveis globais para armazenar a posição atual do
         // cursor como sendo a última posição conhecida do cursor.
@@ -1077,8 +1071,8 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos)
         float dy = ypos - g_LastCursorPosY;
 
         // Atualizamos parâmetros da antebraço com os deslocamentos
-        g_TorsoPositionX += 0.01f*dx;
-        g_TorsoPositionY -= 0.01f*dy;
+        //g_TorsoPositionX += 0.01f*dx;
+        //g_TorsoPositionY -= 0.01f*dy;
 
         // Atualizamos as variáveis globais para armazenar a posição atual do
         // cursor como sendo a última posição conhecida do cursor.
@@ -1128,67 +1122,47 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     //   Se apertar tecla Z       então g_AngleZ += delta;
     //   Se apertar tecla shift+Z então g_AngleZ -= delta;
 
-    float delta = 3.141592/2; // 90 graus, em radianos.
+    float delta = 3.141592/2; // 180 graus, em radianos.
 
 
     if ((key == GLFW_KEY_UP|| key == GLFW_KEY_DOWN )&& action == GLFW_PRESS)
     {
-        if(g_AngleZ != delta )
-        {
+        bool bloco_na_vertical = g_AngleZ != delta;
+        if(bloco_na_vertical){
+            g_AngleY = 0;
             if (g_AngleX < 2*delta)
                 g_AngleX +=  delta;
             else
                 g_AngleX +=  - delta;
-
         }
-        else
-        {
+
+
+        else{
             if (g_AngleY < 2*delta){
                   g_AngleY += delta;
                 }
-
-
             else
                 g_AngleY += - delta;
-        }
-
-
-
-
+            }
 
         if(key == GLFW_KEY_UP)
-            g_PositionZ += 1;
-        else
             g_PositionZ += -1;
-
+        else
+            g_PositionZ += +1;
 
     }
-
-
 
     if ((key == GLFW_KEY_LEFT || key == GLFW_KEY_RIGHT )&& action == GLFW_PRESS)
     {
 
-        if(g_AngleZ < 2*delta)
-        {
-            g_PositionY = 0.0;
-            g_AngleZ +=  + delta;
+        if(g_AngleZ < 2*delta){
 
-
-
-
-
-
+            g_AngleZ += + delta;
         }
 
-        else
+        else{
 
-        {
-            g_PositionY = 0.41;
-            g_AngleZ +=  - delta;
-
-
-
+            g_AngleZ += - delta;
         }
 
         if(key == GLFW_KEY_LEFT)
@@ -1198,21 +1172,12 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
             g_PositionX += 1;
     }
 
-    if (key == GLFW_KEY_Z && action == GLFW_PRESS)
-    {
-        g_AngleZ += (mod & GLFW_MOD_SHIFT) ? -delta : delta;
-    }
-
     // Se o usuário apertar a tecla espaço, resetamos os ângulos de Euler para zero.
     if (key == GLFW_KEY_SPACE && action == GLFW_PRESS)
     {
         g_AngleX = 0.0f;
         g_AngleY = 0.0f;
         g_AngleZ = 0.0f;
-        g_ForearmAngleX = 0.0f;
-        g_ForearmAngleZ = 0.0f;
-        g_TorsoPositionX = 0.0f;
-        g_TorsoPositionY = 0.0f;
     }
 
     // Se o usuário apertar a tecla P, utilizamos projeção perspectiva.
@@ -1311,8 +1276,8 @@ void TextRendering_ShowEulerAngles(GLFWwindow* window)
 
     float pad = TextRendering_LineHeight(window);
 
-    char buffer[80];
-    snprintf(buffer, 80, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n", g_AngleZ, g_AngleY, g_AngleX);
+    char buffer[180];
+    snprintf(buffer, 170, "Euler Angles rotation matrix = Z(%.2f)*Y(%.2f)*X(%.2f)\n Posx = (%.2f), Posy=(%.2f)", g_AngleZ, g_AngleY, g_AngleX,g_PositionX,g_PositionY);
 
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }
@@ -1326,10 +1291,10 @@ void TextRendering_ShowProjection(GLFWwindow* window)
     float lineheight = TextRendering_LineHeight(window);
     float charwidth = TextRendering_CharWidth(window);
 
-    if ( g_UsePerspectiveProjection )
-        TextRendering_PrintString(window, "Perspective", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
-    else
-        TextRendering_PrintString(window, "Orthographic", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
+    //if ( g_UsePerspectiveProjection )
+   //     TextRendering_PrintString(window, "Perspective", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
+    //else
+   //     TextRendering_PrintString(window, "Orthographic", 1.0f-13*charwidth, -1.0f+2*lineheight/10, 1.0f);
 }
 
 // Escrevemos na tela o número de quadros renderizados por segundo (frames per
@@ -1367,7 +1332,3 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
 
     TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
 }
-
-// set makeprg=cd\ ..\ &&\ make\ run\ >/dev/null
-// vim: set spell spelllang=pt_br :
-
