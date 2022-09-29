@@ -315,7 +315,7 @@ int main()
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -10.0f; // Posição do "far plane"
+        float farplane  = -25.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -403,7 +403,7 @@ int main()
 
             else if (i == 34)   { model = Matrix_Translate(9.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
             else if (i == 35)   { model = Matrix_Translate(9.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            
+
 
             // Enviamos a matriz "model" para a placa de vídeo (GPU). Veja o
             // arquivo "shader_vertex.glsl", onde esta é efetivamente
@@ -669,30 +669,30 @@ GLuint BuildTriangles()
     // Definimos os índices dos vértices que definem as FACES de um cubo
     // através de 12 triângulos que serão desenhados com o modo de renderização
     // GL_TRIANGLES.
-        0, 1, 2, // triângulo 1 
-        7, 6, 5, // triângulo 2 
-        3, 2, 6, // triângulo 3 
-        4, 0, 3, // triângulo 4 
-        4, 5, 1, // triângulo 5 
-        1, 5, 6, // triângulo 6 
-        0, 2, 3, // triângulo 7 
-        7, 5, 4, // triângulo 8 
-        3, 6, 7, // triângulo 9 
+        0, 1, 2, // triângulo 1
+        7, 6, 5, // triângulo 2
+        3, 2, 6, // triângulo 3
+        4, 0, 3, // triângulo 4
+        4, 5, 1, // triângulo 5
+        1, 5, 6, // triângulo 6
+        0, 2, 3, // triângulo 7
+        7, 5, 4, // triângulo 8
+        3, 6, 7, // triângulo 9
         4, 3, 7, // triângulo 10
         4, 1, 0, // triângulo 11
         1, 6, 2, // triângulo 12
     // Definimos os índices dos vértices que definem as ARESTAS de um cubo
     // através de 12 linhas que serão desenhadas com o modo de renderização
     // GL_LINES.
-        0, 1, // linha 1 
-        1, 2, // linha 2 
-        2, 3, // linha 3 
-        3, 0, // linha 4 
-        0, 4, // linha 5 
-        4, 7, // linha 6 
-        7, 6, // linha 7 
-        6, 2, // linha 8 
-        6, 5, // linha 9 
+        0, 1, // linha 1
+        1, 2, // linha 2
+        2, 3, // linha 3
+        3, 0, // linha 4
+        0, 4, // linha 5
+        4, 7, // linha 6
+        7, 6, // linha 7
+        6, 2, // linha 8
+        6, 5, // linha 9
         5, 4, // linha 10
         5, 1, // linha 11
         7, 3 // linha 12
@@ -1060,17 +1060,17 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
     {
         g_ShowInfoText = !g_ShowInfoText;
     }
-	
+
 	// WASD movimentação da camera.
     if (key == GLFW_KEY_W && action == GLFW_PRESS) { g_MoveForward = true; }
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE) { g_MoveForward = false; }
-	
+
 	if (key == GLFW_KEY_A && action == GLFW_PRESS) { g_MoveLeft = true; }
 	if (key == GLFW_KEY_A && action == GLFW_RELEASE) { g_MoveLeft = false; }
-	
+
 	if (key == GLFW_KEY_S && action == GLFW_PRESS) { g_MoveBackward = true; }
 	if (key == GLFW_KEY_S && action == GLFW_RELEASE) { g_MoveBackward = false; }
-	
+
 	if (key == GLFW_KEY_D && action == GLFW_PRESS) { g_MoveRight = true; }
 	if (key == GLFW_KEY_D && action == GLFW_RELEASE) { g_MoveRight = false; }
 }
@@ -1202,7 +1202,7 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     if ( ellapsed_seconds > 1.0f )
     {
         numchars = snprintf(buffer, 20, "%.2f fps", ellapsed_frames / ellapsed_seconds);
-    
+
         old_seconds = seconds;
         ellapsed_frames = 0;
     }
