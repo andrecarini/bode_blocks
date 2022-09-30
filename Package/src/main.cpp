@@ -75,7 +75,7 @@ void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
 // Carregamento de imagens para textura
-GLuint LoadBitmap(const char *imagepath);
+GLuint Load_Texture_BMP(const char *file_path);
 
 // Definimos uma estrutura que armazenará dados necessários para renderizar
 // cada objeto da cena virtual.
@@ -234,7 +234,7 @@ int main()
     TextRendering_Init();
 
     // Carregar textura
-    GLuint Texture = LoadBitmap("img/floor_texture.bmp");
+    GLuint FloorTexture = Load_Texture_BMP("floor_texture.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -353,56 +353,56 @@ int main()
             // slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
             glm::mat4 model;
 
-            if      (i == 1)    { model = Matrix_Translate(0.0f, 0.0f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 2)    { model = Matrix_Translate(1.0f, 0.0f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 3)    { model = Matrix_Translate(2.0f, 0.0f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            if      (i == 1)    { model = Matrix_Translate(0.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 2)    { model = Matrix_Translate(1.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 3)    { model = Matrix_Translate(2.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 4)    { model = Matrix_Translate(0.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 5)    { model = Matrix_Translate(1.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 6)    { model = Matrix_Translate(2.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 4)    { model = Matrix_Translate(0.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 5)    { model = Matrix_Translate(1.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 6)    { model = Matrix_Translate(2.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 7)    { model = Matrix_Translate(0.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 8)    { model = Matrix_Translate(1.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 9)    { model = Matrix_Translate(2.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 7)    { model = Matrix_Translate(0.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 8)    { model = Matrix_Translate(1.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 9)    { model = Matrix_Translate(2.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 10)   { model = Matrix_Translate(1.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 11)   { model = Matrix_Translate(2.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-
-            else if (i == 12)   { model = Matrix_Translate(3.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 13)   { model = Matrix_Translate(4.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 14)   { model = Matrix_Translate(5.0f, 0.0f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 15)   { model = Matrix_Translate(3.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 16)   { model = Matrix_Translate(4.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 17)   { model = Matrix_Translate(5.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 18)   { model = Matrix_Translate(3.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 19)   { model = Matrix_Translate(4.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 20)   { model = Matrix_Translate(5.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 21)   { model = Matrix_Translate(5.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 10)   { model = Matrix_Translate(1.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 11)   { model = Matrix_Translate(2.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
-            else if (i == 22)   { model = Matrix_Translate(6.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 23)   { model = Matrix_Translate(7.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 24)   { model = Matrix_Translate(8.0f, 0.0f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 12)   { model = Matrix_Translate(3.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 13)   { model = Matrix_Translate(4.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 14)   { model = Matrix_Translate(5.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 25)   { model = Matrix_Translate(6.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 26)   { model = Matrix_Translate(7.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 27)   { model = Matrix_Translate(8.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 15)   { model = Matrix_Translate(3.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 16)   { model = Matrix_Translate(4.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 17)   { model = Matrix_Translate(5.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 28)   { model = Matrix_Translate(6.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 29)   { model = Matrix_Translate(7.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 30)   { model = Matrix_Translate(8.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 18)   { model = Matrix_Translate(3.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 19)   { model = Matrix_Translate(4.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 20)   { model = Matrix_Translate(5.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 31)   { model = Matrix_Translate(6.0f, 0.0f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 32)   { model = Matrix_Translate(7.0f, 0.0f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 33)   { model = Matrix_Translate(8.0f, 0.0f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 21)   { model = Matrix_Translate(5.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
-            else if (i == 34)   { model = Matrix_Translate(9.0f, 0.0f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 35)   { model = Matrix_Translate(9.0f, 0.0f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 22)   { model = Matrix_Translate(6.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 23)   { model = Matrix_Translate(7.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 24)   { model = Matrix_Translate(8.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 25)   { model = Matrix_Translate(6.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 26)   { model = Matrix_Translate(7.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 27)   { model = Matrix_Translate(8.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 28)   { model = Matrix_Translate(6.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 29)   { model = Matrix_Translate(7.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 30)   { model = Matrix_Translate(8.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 31)   { model = Matrix_Translate(6.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 32)   { model = Matrix_Translate(7.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 33)   { model = Matrix_Translate(8.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+
+            else if (i == 34)   { model = Matrix_Translate(9.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 35)   { model = Matrix_Translate(9.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
             // Enviamos a matriz "model" para a placa de vídeo (GPU). Veja o
@@ -1081,70 +1081,68 @@ void ErrorCallback(int error, const char* description)
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
 }
 
-// Carregamento de imagens (textura) formato BMP 128x128
-// TODO REWRITE/REFACTOR @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-GLuint LoadBitmap(const char *imagepath) {
-    // Data read from the header of the BMP file
-    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
-    unsigned int dataPos;     // Position in the file where the actual data begins
-    unsigned int width, height;
-    unsigned int imageSize; // = width*height*3
-    // Actual RGB data
-    unsigned char *data;
+// Carregamento de imagens (textura) formato TGA 128x128
+GLuint Load_Texture_BMP(const char *file_path)
+{
 
-    FILE *file = fopen(imagepath, "rb");
+    // Cria uma textura OpenGL
+    GLuint textureID;
+    glGenTextures(1, &textureID);
+
+    // Faz o bind da textura
+    glBindTexture(GL_TEXTURE_2D, textureID);
+
+    // ### Leitura do arquivo ###
+    unsigned char header[54];   // Todo arquivo BMP começa com um cabeçalho de 54 bytes
+    unsigned int dataPos;       // Posição em que começa o payload da imagem
+    unsigned int width, height;
+    unsigned int imageSize;     // = width*height*3
+    unsigned char *data;        // Valores RGB
+    FILE *file = fopen(file_path, "rb");
     if (!file)
     {
-        printf("Image could not be opened\n");
-        return false;
+        printf("O arquivo com a textura nao foi localizado!\n");
+        return 0;
     }
-
     if (fread(header, 1, 54, file) != 54)
-    { // If not 54 bytes read : problem
-        printf("Not a correct BMP file\n");
+    { // If não tiver lido 54 bytes, o arquivo está malformado.
+        printf("O arquivo para textura esta errado.\n");
         return false;
     }
-
     if (header[0] != 'B' || header[1] != 'M')
-    {
-        printf("Not a correct BMP file\n");
-        return false;
+    { // Checagem dos magic bytes BM de todo arquivo BMP
+        printf("O arquivo para textura nao e um BMP.\n");
+        return 0;
     }
-
-    // Read ints from the byte array
+    // Leitura dos metadados
     dataPos = *(int *)&(header[0x0A]);
     imageSize = *(int *)&(header[0x22]);
     width = *(int *)&(header[0x12]);
     height = *(int *)&(header[0x16]);
-
-    // Some BMP files are misformatted, guess missing information
+    // Preenchendo informações que faltam, se o arquivo BMP não forneceu corretamente
     if (imageSize == 0)
-        imageSize = width * height * 3; // 3 : one byte for each Red, Green and Blue component
+        imageSize = width * height * 3; // 3 : Red, Green, Blue
     if (dataPos == 0)
-        dataPos = 54; // The BMP header is done that way
-
-    // Create a buffer
+        dataPos = 54; // Porque sim. (especificação do formato BMP)
+    // Criar o buffer para leitura do payload
     data = new unsigned char[imageSize];
-
-    // Read the actual data from the file into the buffer
+    // Leitura do arquivo para o buffer
     fread(data, 1, imageSize, file);
-
-    // Everything is in memory now, the file can be closed
+    // Fechar o arquivo original
     fclose(file);
+    // ### Fim da leitura do arquivo ###
 
-    // Create one OpenGL texture
-    GLuint textureID;
-    glGenTextures(1, &textureID);
-
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-
-    // Give the image to OpenGL
+    // Passa a imagem para o OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_BGR, GL_UNSIGNED_BYTE, data);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    // Configurações necessárias
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
 
+    // Retorna o ID da textura
     return textureID;
 }
 
