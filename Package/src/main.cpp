@@ -1167,7 +1167,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
                 g_AngleY = 0;
                 g_AngleZ = 0;
                 if (g_AngleX < 2*delta)   {g_AngleX += + delta;}  else {g_AngleX += - delta;}
-                if (key == GLFW_KEY_DOWN) {g_PositionZ += +1.0;}  else  {g_PositionZ += -1.0;}
+                if (key == GLFW_KEY_DOWN) {g_PositionZ += +1.5;}  else  {g_PositionZ += -1.5;}
                 g_PositionY = 0.0;
          }
          break;
@@ -1178,7 +1178,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
                 g_AngleX = 0;
                 g_AngleY = 0;
                 if (g_AngleZ < 2*delta)   {g_AngleZ += delta;}  else {g_AngleZ += - delta;}
-                if (key == GLFW_KEY_LEFT) {g_PositionX+= -1.0;} else {g_PositionX += +1.0;}
+                if (key == GLFW_KEY_LEFT) {g_PositionX+= -1.5;} else {g_PositionX += +1.5;}
                 g_PositionY = 0.0;
 
          }
@@ -1187,7 +1187,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
                 block_position = 3;
                 g_AngleX = 0;
                 if (g_AngleY < 2*delta)   {g_AngleY += delta;}  else {g_AngleY += - delta;}
-                if (key == GLFW_KEY_DOWN) {g_PositionZ += +1.5;}  else  {g_PositionZ += -1.5;}
+                if (key == GLFW_KEY_DOWN) {g_PositionZ += +1.0;}  else  {g_PositionZ += -1.0;}
                 g_PositionY = -0.5;
          }
 
