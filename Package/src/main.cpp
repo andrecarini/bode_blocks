@@ -46,6 +46,8 @@
 #include "utils.h"
 #include "matrices.h"
 
+#define TAO 0.5
+
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -110,6 +112,7 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
+
 
 
 
@@ -298,6 +301,7 @@ int main()
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
 
+    glm::vec4 FindPoint(float t);
     // Variáveis auxiliares utilizadas para chamada à função
     // TextRendering_ShowModelViewProjection(), armazenando matrizes 4x4.
     glm::mat4 the_projection;
@@ -305,10 +309,11 @@ int main()
     glm::mat4 the_view;
 
     glm::vec4 camera_position_c = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Ponto "c", centro da câmera
-
+    float start=glfwGetTime();
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
+        float t=glfwGetTime()-start;
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -594,9 +599,10 @@ int main()
     //-------------------------------------- cubo jogador --------------------------------------------------//
 
     //---------------------------------------esfera--------------------------------------------------------//
-
+         t=(1+sin(t))/2;
         // Desenhamos o modelo da esfera
-        model = Matrix_Translate(8.0f,1.0f,3.0f);
+        glm::vec4 translator = FindPoint(t);
+        model = Matrix_Translate(translator.x, translator.y, translator.z);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(render_as_black_uniform, true);
 
@@ -1589,6 +1595,49 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
     // "Desligamos" o VAO, evitando assim que operações posteriores venham a
     // alterar o mesmo. Isso evita bugs.
     glBindVertexArray(0);
+}
+
+glm::vec4 FindPoint(float t)
+{
+ glm::vec4 p1,p2,p3,p4,p5,p6,p7;
+
+ p1=glm::vec4(8.0f, 1.0f, 3.0f, 0.0f);
+ p2=glm::vec4(7.75f, 1.5f, 2.75f, 0.0f);
+ p3=glm::vec4(7.25f, 1.0f, 2.25f, 0.0f);
+ p4=glm::vec4(7.0f, 0.0f, 2.0f, 0.0f);
+
+ p7=glm::vec4(-3.0f, 1.0f, 3.0f, 0.0f);
+ p6=glm::vec4(-3.75f, 1.5f, 2.75f, 0.0f);
+ p5=glm::vec4(-3.25f, 1.0f, 2.25f, 0.0f);
+
+ glm::vec4 c12, c23,c34, c123, c234, c;
+
+ if(t<=TAO)
+   {
+    t=t/TAO;
+
+    c12=p1+t*(p2-p1);
+    c23=p2+t*(p3-p2);
+    c34=p3+t*(p4-p3);
+
+    c123=c12+t*(c23-c12);
+    c234=c23+t*(c34-c23);
+    c=c123+t*(c234-c123);
+   }
+ else
+   {
+    t=(t-TAO)*2;
+
+    c12=p4+t*(p5-p4);
+    c23=p5+t*(p6-p5);
+    c34=p6+t*(p7-p6);
+
+    c123=c12+t*(c23-c12);
+    c234=c23+t*(c34-c23);
+    c=c123+t*(c234-c123);
+   }
+
+ return(c);
 }
 
 
