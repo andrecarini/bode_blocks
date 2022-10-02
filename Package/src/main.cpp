@@ -113,6 +113,8 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+bool failCheck(float x, float y, float z);
+
 
 
 
@@ -533,6 +535,10 @@ int main()
                  *Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
                  *Matrix_Rotate_X(g_AngleX)
                  * Matrix_Scale(1.0f, 2.0f, 1.0f);
+
+       if(failCheck(g_PositionX, g_PositionY, g_PositionZ))
+            model = Matrix_Translate(0.0f, -25.0f, 0.0f);
+
        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
 
@@ -596,12 +602,14 @@ int main()
         );
 
 
+
     //-------------------------------------- cubo jogador --------------------------------------------------//
 
     //---------------------------------------esfera--------------------------------------------------------//
          t=(1+sin(t))/2;
         // Desenhamos o modelo da esfera
         glm::vec4 translator = FindPoint(t);
+
         model = Matrix_Translate(translator.x, translator.y, translator.z);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(render_as_black_uniform, true);
@@ -1638,6 +1646,21 @@ glm::vec4 FindPoint(float t)
    }
 
  return(c);
+}
+
+bool failCheck(float x, float y, float z)
+{
+    if (
+        (x == 5 && z == 4) ||
+        (x <= 2 && z <= 2) ||
+        (x == 9 && (z >= 3 && z <= 4)) ||
+        ((x >= 1 && x <= 2) && (z == 3)) ||
+        ((x >= 3 && x <= 5) && (z >= 1 && z <= 3)) ||
+        ((x >= 6 && x <= 8) && (z >= 2 && z <= 5)) )
+            return false;
+
+    else
+            return true;
 }
 
 
