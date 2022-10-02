@@ -46,7 +46,7 @@
 #include "utils.h"
 #include "matrices.h"
 
-#define TAO 0.5
+#define TAO 0.7
 
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
@@ -1601,14 +1601,14 @@ glm::vec4 FindPoint(float t)
 {
  glm::vec4 p1,p2,p3,p4,p5,p6,p7;
 
- p1=glm::vec4(8.0f, 1.0f, 3.0f, 0.0f);
- p2=glm::vec4(7.75f, 1.5f, 2.75f, 0.0f);
- p3=glm::vec4(7.25f, 1.0f, 2.25f, 0.0f);
- p4=glm::vec4(7.0f, 0.0f, 2.0f, 0.0f);
+ p1=glm::vec4(1.0f, 1.0f, 3.0f, 0.0f);
+ p2=glm::vec4(2.0f, 1.0f, 2.0f, 0.0f);
+ p3=glm::vec4(3.0f, 1.0f, 1.0f, 0.0f);
+ p4=glm::vec4(4.0f, 1.0f, 2.0f, 0.0f);
 
- p7=glm::vec4(-3.0f, 1.0f, 3.0f, 0.0f);
- p6=glm::vec4(-3.75f, 1.5f, 2.75f, 0.0f);
- p5=glm::vec4(-3.25f, 1.0f, 2.25f, 0.0f);
+ p7=glm::vec4(7.0f, 1.0f, 3.0f, 0.0f);
+ p6=glm::vec4(6.0f, 1.0f, 3.0f, 0.0f);
+ p5=glm::vec4(5.0f, 1.0f, 3.0f, 0.0f);
 
  glm::vec4 c12, c23,c34, c123, c234, c;
 
