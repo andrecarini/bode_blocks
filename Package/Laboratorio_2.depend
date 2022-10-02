@@ -5116,20 +5116,25 @@
 	<stddef.h>
 	<stdint.h>
 
-1664635510 source:c:\users\aline\projects-2\bode_blocks\package\src\main.cpp
+1664663415 source:c:\users\aline\projects-2\bode_blocks\package\src\main.cpp
 	<cmath>
 	<cstdio>
 	<cstdlib>
 	<map>
+	<stack>
 	<string>
+	<vector>
 	<limits>
 	<fstream>
 	<sstream>
+	<stdexcept>
+	<algorithm>
 	<glad/glad.h>
 	<GLFW/glfw3.h>
 	<glm/mat4x4.hpp>
 	<glm/vec4.hpp>
 	<glm/gtc/type_ptr.hpp>
+	<tiny_obj_loader.h>
 	"utils.h"
 	"matrices.h"
 
@@ -5398,4 +5403,21 @@
 	<glm/mat4x4.hpp>
 	<glm/vec4.hpp>
 	<glm/gtc/matrix_transform.hpp>
+
+1664664733 c:\users\aline\projects-2\bode_blocks\package\include\tiny_obj_loader.h
+	<map>
+	<string>
+	<vector>
+	<cassert>
+	<cctype>
+	<cmath>
+	<cstddef>
+	<cstdlib>
+	<cstring>
+	<utility>
+	<fstream>
+	<sstream>
+
+1664672581 source:c:\users\aline\projects-2\bode_blocks\package\src\tiny_obj_loader.cpp
+	"tiny_obj_loader.h"
 
