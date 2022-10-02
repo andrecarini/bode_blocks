@@ -537,7 +537,7 @@ int main()
                  * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
        if(failCheck(g_PositionX, g_PositionY, g_PositionZ))
-            model = Matrix_Translate(0.0f, -25.0f, 0.0f);
+        model = Matrix_Translate(0.0f, -25.0f, 0.0f);
 
        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
