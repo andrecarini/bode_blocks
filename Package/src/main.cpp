@@ -624,6 +624,8 @@ int main()
         glm::vec4 translator = FindPoint(t);
 
         model = Matrix_Translate(translator.x, translator.y, translator.z);
+        if(translator.x == g_PositionX && translator.z == g_PositionZ)
+            printf("bateuuu");
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glUniform1i(render_as_black_uniform, true);
 
@@ -633,6 +635,7 @@ int main()
             g_VirtualScene["sphere"].num_indices,
             GL_UNSIGNED_INT,
             (void*)(g_VirtualScene["sphere"].first_index * sizeof(GLuint))
+
     );
      //---------------------------------------esfera--------------------------------------------------------//
 
@@ -1664,10 +1667,10 @@ glm::vec4 FindPoint(float t)
 bool failCheck(float x, float y, float z)
 {
     if (
-        (x == 5 && z == 4) ||
+        ((x >= 4.5 && x <= 5) && ((z >= 4 && z <= 4.5))) ||
         ((-0.5 <= x && x <= 2.5) && (-0.5<= z && z<= 2.5)) ||
-        (x == 9.5 && (z >= 2.0 && z <= 4.5)) ||
-        ((x >= 0.5 && x <= 2.5) && (z == 3.5)) ||
+        ((x >= 9.0 && x <= 9.5) && (z >= 2.0 && z <= 4.5)) ||
+        ((x >= 0.5 && x <= 2.5) && (z == 3)) ||
         ((x >= 2.5 && x <= 5.5) && (z >= 0.5 && z <= 3.5)) ||
         ((x >= 5.5 && x <= 8.5) && (z >= 1.5 && z <= 5.5)) )
             return false;
