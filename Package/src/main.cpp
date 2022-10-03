@@ -115,6 +115,9 @@ void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
 
+// Lógica do jogo
+bool failCheck(float x, float y, float z);
+
 // Carregamento de imagens para textura
 GLuint Load_Texture_BMP(const char *file_path);
 
@@ -511,7 +514,6 @@ int main()
         glBindVertexArray(0);
 
         //-------------------------------------- cubo jogador --------------------------------------------------//
-        glm::mat4 model;
         model = Matrix_Translate(0.0f, 1.0f, 0.0f);
         model = model * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ)
                     *Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
