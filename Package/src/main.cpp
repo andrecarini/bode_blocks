@@ -273,7 +273,7 @@ int main()
 
     //LoadShadersFromFiles();
     // Construímos a representação de objetos geométricos através de malhas de triângulos
-    ObjModel spheremodel("../../data/sphere.obj");
+    ObjModel spheremodel("sphere.obj");
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
@@ -500,48 +500,20 @@ int main()
             );
         }
 
-        // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
-        // Para tanto, colocamos a matriz de modelagem igual à identidade.
-        // Veja slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-        glm::mat4 model = Matrix_Identity();
-
-        // Enviamos a nova matriz "model" para a placa de vídeo (GPU). Veja o
-        // arquivo "shader_vertex.glsl".
-        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-
-        // "Desligamos" o VAO, evitando assim que operações posteriores venham a
-        // alterar o mesmo. Isso evita bugs.
-        glBindVertexArray(0);
-
         //-------------------------------------- cubo jogador --------------------------------------------------//
-        model = Matrix_Translate(0.0f, 1.0f, 0.0f);
-        model = model * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ)
-                    *Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
-                    *Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
-                    *Matrix_Rotate_X(g_AngleX)
-                    * Matrix_Scale(1.0f, 2.0f, 1.0f);
+        glm::mat4 model = Matrix_Translate(0.0f, 1.0f, 0.0f);
+        glUniform1i(render_as_black_uniform, false);
+        model = model   * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ)
+                        * Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
+                        * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
+                        * Matrix_Rotate_X(g_AngleX)
+                        * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
-        if(failCheck(g_PositionX, g_PositionY, g_PositionZ))
+        if( failCheck(g_PositionX, g_PositionY, g_PositionZ) )
             model = Matrix_Translate(0.0f, -25.0f, 0.0f);
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-
-        // Informamos para a placa de vídeo (GPU) que a variável booleana
-        // "render_as_black" deve ser colocada como "false". Veja o arquivo
-        // "shader_vertex.glsl".
-        glUniform1i(render_as_black_uniform, false);
-
-        // Pedimos para a GPU rasterizar os vértices do cubo apontados pelo
-        // VAO como triângulos, formando as faces do cubo. Esta
-        // renderização irá executar o Vertex Shader definido no arquivo
-        // "shader_vertex.glsl", e o mesmo irá utilizar as matrizes
-        // "model", "view" e "projection" definidas acima e já enviadas
-        // para a placa de vídeo (GPU).
-        //
-        // Veja a definição de g_VirtualScene["cube_faces"] dentro da
-        // função BuildTriangles(), e veja a documentação da função
-        // glDrawElements() em http://docs.gl/gl3/glDrawElements.
         glDrawElements(
             g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
             g_VirtualScene["cube_faces"].num_indices,
@@ -549,8 +521,6 @@ int main()
             (void*)g_VirtualScene["cube_faces"].first_index
         );
 
-        // Pedimos para OpenGL desenhar linhas com largura de 4 pixels.
-        glLineWidth(4.0f);
         //-------------------------------------- cubo jogador --------------------------------------------------//
 
         //---------------------------------------esfera--------------------------------------------------------//
