@@ -292,6 +292,8 @@ int main()
     // Carregar textura
     GLuint FloorTexture = Load_Texture_BMP("floor_texture.bmp");
     GLuint ExitTexture = Load_Texture_BMP("exit_texture.bmp");
+    GLuint PlayerTexture = Load_Texture_BMP("player_texture.bmp");
+    GLuint SphereTexture = Load_Texture_BMP("sphere_texture.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -513,7 +515,7 @@ int main()
             model = Matrix_Translate(0.0f, -25.0f, 0.0f);
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
-
+        glBindTexture(GL_TEXTURE_2D, PlayerTexture);
         glDrawElements(
             g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
             g_VirtualScene["cube_faces"].num_indices,
@@ -535,6 +537,7 @@ int main()
         glUniform1i(render_as_black_uniform, true);
 
         glBindVertexArray(g_VirtualScene["sphere"].vertex_array_object_id);
+        glBindTexture(GL_TEXTURE_2D, SphereTexture);
         glDrawElements(
             g_VirtualScene["sphere"].rendering_mode,
             g_VirtualScene["sphere"].num_indices,
