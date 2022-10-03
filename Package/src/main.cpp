@@ -46,8 +46,9 @@
 #include "utils.h"
 #include "matrices.h"
 
+// Defines
 #define TAO 0.7
-
+#define TEXCOORD_SHADER_LOCATION 1
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -75,6 +76,7 @@ struct ObjModel
         printf("OK.\n");
     }
 };
+
 
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
@@ -112,11 +114,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-bool failCheck(float x, float y, float z);
-
-
-
 
 // Carregamento de imagens para textura
 GLuint Load_Texture_BMP(const char *file_path);
@@ -291,6 +288,7 @@ int main()
 
     // Carregar textura
     GLuint FloorTexture = Load_Texture_BMP("floor_texture.bmp");
+    GLuint ExitTexture = Load_Texture_BMP("exit_texture.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -405,6 +403,14 @@ int main()
         // Desenho do mapa (chão) feito de cópias do bloco
         for (int i = 1; i <= 35; ++i)
         {
+            // Colocar as texturas
+            glActiveTexture(GL_TEXTURE0);
+            if (i == 29) {
+                glBindTexture(GL_TEXTURE_2D, ExitTexture);
+            } else {
+                glBindTexture(GL_TEXTURE_2D, FloorTexture);
+            }
+
             // Cada cópia do cubo possui uma matriz de modelagem independente,
             // já que cada cópia estará em uma posição (rotação, escala, ...)
             // diferente em relação ao espaço global (World Coordinates). Veja
@@ -489,31 +495,38 @@ int main()
                 GL_UNSIGNED_INT,
                 (void*)g_VirtualScene["cube_faces"].first_index
             );
+        }
 
-            // Pedimos para OpenGL desenhar linhas com largura de 4 pixels.
-            glLineWidth(4.0f);
+        // Agora queremos desenhar os eixos XYZ de coordenadas GLOBAIS.
+        // Para tanto, colocamos a matriz de modelagem igual à identidade.
+        // Veja slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
+        glm::mat4 model = Matrix_Identity();
 
-            // Pedimos para a GPU rasterizar os vértices dos eixos XYZ
-            // apontados pelo VAO como linhas. Veja a definição de
-            // g_VirtualScene["axes"] dentro da função BuildTriangles(), e veja
-            // a documentação da função glDrawElements() em
-            // http://docs.gl/gl3/glDrawElements.
-            //
-            // Importante: estes eixos serão desenhamos com a matriz "model"
-            // definida acima, e portanto sofrerão as mesmas transformações
-            // geométricas que o cubo. Isto é, estes eixos estarão
-            // representando o sistema de coordenadas do modelo (e não o global)!
-            glDrawElements(
-                g_VirtualScene["axes"].rendering_mode,
-                g_VirtualScene["axes"].num_indices,
-                GL_UNSIGNED_INT,
-                (void*)g_VirtualScene["axes"].first_index
-            );
+        // Enviamos a nova matriz "model" para a placa de vídeo (GPU). Veja o
+        // arquivo "shader_vertex.glsl".
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-            // Informamos para a placa de vídeo (GPU) que a variável booleana
-            // "render_as_black" deve ser colocada como "true". Veja o arquivo
-            // "shader_vertex.glsl".
-            glUniform1i(render_as_black_uniform, true);
+        // "Desligamos" o VAO, evitando assim que operações posteriores venham a
+        // alterar o mesmo. Isso evita bugs.
+        glBindVertexArray(0);
+
+        // Imprimimos na tela as infos de ajuda.
+        TextRendering_ShowHelp(window);
+
+        // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
+        TextRendering_ShowProjection(window);
+
+        // Imprimimos na tela informação sobre o número de quadros renderizados
+        // por segundo (frames per second).
+        TextRendering_ShowFramesPerSecond(window);
+
+        // O framebuffer onde OpenGL executa as operações de renderização não
+        // é o mesmo que está sendo mostrado para o usuário, caso contrário
+        // seria possível ver artefatos conhecidos como "screen tearing". A
+        // chamada abaixo faz a troca dos buffers, mostrando para o usuário
+        // tudo que foi renderizado pelas funções acima.
+        // Veja o link: Veja o link: https://en.wikipedia.org/w/index.php?title=Multiple_buffering&oldid=793452829#Double_buffering_in_computer_graphics
+        glfwSwapBuffers(window);
 
             // Pedimos para a GPU rasterizar os vértices do cubo apontados pelo
             // VAO como linhas, formando as arestas pretas do cubo. Veja a
@@ -712,7 +725,7 @@ GLuint BuildTriangles()
         -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 4
         -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 5
          0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 6
-         0.5f,  0.5f, -0.5f, 1.0f // posição do vértice 7
+         0.5f,  0.5f, -0.5f, 1.0f  // posição do vértice 7
     };
 
     // Criamos o identificador (ID) de um Vertex Buffer Object (VBO).  Um VBO é
@@ -788,25 +801,25 @@ GLuint BuildTriangles()
     // Tal cor é definida como coeficientes RGBA: Red, Green, Blue, Alpha;
     // isto é: Vermelho, Verde, Azul, Alpha (valor de transparência).
     // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
-    GLfloat color_coefficients[] = {
+    GLfloat texture_coordinates[] = {
     // Cores dos vértices do cubo
-    //  R     G     B     A
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 0
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 1
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 2
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 3
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 4
-        1.0f, 0.5f, 0.0f, 1.0f, // cor do vértice 5
-        0.0f, 0.5f, 1.0f, 1.0f, // cor do vértice 6
-        0.0f, 0.5f, 1.0f, 1.0f // cor do vértice 7
+    //  U     V
+        0.0f, 0.0f, // coordenada UV da textura no vértice 0
+        1.0f, 0.0f, // coordenada UV da textura no vértice 1
+        0.0f, 0.0f, // coordenada UV da textura no vértice 2
+        1.0f, 0.0f, // coordenada UV da textura no vértice 3
+        0.0f, 1.0f, // coordenada UV da textura no vértice 4
+        1.0f, 1.0f, // coordenada UV da textura no vértice 5
+        0.0f, 1.0f, // coordenada UV da textura no vértice 6
+        1.0f, 1.0f  // coordenada UV da textura no vértice 7
     };
-    GLuint VBO_color_coefficients_id;
-    glGenBuffers(1, &VBO_color_coefficients_id);
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_color_coefficients_id);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color_coefficients), NULL, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(color_coefficients), color_coefficients);
-    location = 1; // "(location = 1)" em "shader_vertex.glsl"
-    number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
+    GLuint VBO_texture_coordinates_id;
+    glGenBuffers(1, &VBO_texture_coordinates_id);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_texture_coordinates_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coordinates), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texture_coordinates), texture_coordinates);
+    location = TEXCOORD_SHADER_LOCATION; // "(location = 1)" em "shader_vertex.glsl"
+    number_of_dimensions = 2; // vec2 em "shader_vertex.glsl"
     glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(location);
     glBindBuffer(GL_ARRAY_BUFFER, 0);

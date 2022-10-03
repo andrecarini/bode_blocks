@@ -1,43 +1,37 @@
 #version 330 core
 
-// Atributos de vértice recebidos como entrada ("in") pelo Vertex Shader.
-// Veja a função BuildTriangle() em "main.cpp".
+// Atributos de vÃ©rtice recebidos como entrada ("in") pelo Vertex Shader.
+// Veja a funÃ§Ã£o BuildTriangle() em "main.cpp".
 layout (location = 0) in vec4 model_coefficients;
-layout (location = 1) in vec4 color_coefficients;
+layout (location = 1) in vec2 TexCoord;
 
-// Atributos de vértice que serão gerados como saída ("out") pelo Vertex Shader.
-// ** Estes serão interpolados pelo rasterizador! ** gerando, assim, valores
-// para cada fragmento, os quais serão recebidos como entrada pelo Fragment
-// Shader. Veja o arquivo "shader_fragment.glsl".
-out vec4 cor_interpolada_pelo_rasterizador;
+// Texturas
+out vec2 TexCoord0;
 
-// Matrizes computadas no código C++ e enviadas para a GPU
+// Matrizes computadas no cï¿½digo C++ e enviadas para a GPU
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
 
-// Variável booleana no código C++ também enviada para a GPU
-uniform bool render_as_black;
-
 void main()
 {
-    // A variável gl_Position define a posição final de cada vértice
+    // A variÃ¡vel gl_Position define a posiÃ§Ã£o final de cada vÃ©rtice
     // OBRIGATORIAMENTE em "normalized device coordinates" (NDC), onde cada
-    // coeficiente está entre -1 e 1.  (Veja {+NDC2+}).
+    // coeficiente estÃ¡ entre -1 e 1.  (Veja {+NDC2+}).
     //
-    // O código em "main.cpp" define os vértices dos modelos em coordenadas
+    // O cÃ³digo em "main.cpp" define os vÃ©rtices dos modelos em coordenadas
     // locais de cada modelo (array model_coefficients). Abaixo, utilizamos
-    // operações de modelagem, definição da câmera, e projeção, para computar
-    // as coordenadas finais em NDC (variável gl_Position). Após a execução
-    // deste Vertex Shader, a placa de vídeo (GPU) fará a divisão por W. Veja
+    // operaÃ§Ãµes de modelagem, definiÃ§Ã£o da cÃ¢mera, e projeÃ§Ã£o, para computar
+    // as coordenadas finais em NDC (variÃ¡vel gl_Position). ApÃ³s a execuÃ§Ã£o
+    // deste Vertex Shader, a placa de vÃ­deo (GPU) farÃ¡ a divisÃ£o por W. Veja
     // slides 41-67 e 69-86 do documento Aula_09_Projecoes.pdf.
 
     gl_Position = projection * view * model * model_coefficients;
 
-    // Como as variáveis acima  (tipo vec4) são vetores com 4 coeficientes,
-    // também é possível acessar e modificar cada coeficiente de maneira
-    // independente. Esses são indexados pelos nomes x, y, z, e w (nessa
-    // ordem, isto é, 'x' é o primeiro coeficiente, 'y' é o segundo, ...):
+    // Como as variÃ¡veis acima  (tipo vec4) sÃ£o vetores com 4 coeficientes,
+    // tambÃ©m Ã© possÃ­vel acessar e modificar cada coeficiente de maneira
+    // independente. Esses sÃ£o indexados pelos nomes x, y, z, e w (nessa
+    // ordem, isto Ã©, 'x' Ã© o primeiro coeficiente, 'y' Ã© o segundo, ...):
     //
     //     gl_Position.x = model_coefficients.x;
     //     gl_Position.y = model_coefficients.y;
@@ -45,19 +39,6 @@ void main()
     //     gl_Position.w = model_coefficients.w;
     //
 
-    if ( render_as_black )
-    {
-        // Ignoramos o atributo cor dos vértices, colocando a cor final como
-        // preta. Utilizamos isto para renderizar as arestas pretas dos cubos.
-        cor_interpolada_pelo_rasterizador = vec4(0.0f,0.0f,0.0f,1.0f);
-    }
-    else
-    {
-        // Copiamos o atributo cor (de entrada) de cada vértice para a variável
-        // "cor_interpolada_pelo_rasterizador". Esta variável será interpolada pelo
-        // rasterizador, gerando valores interpolados para cada fragmento!  Veja o
-        // arquivo "shader_fragment.glsl".
-        cor_interpolada_pelo_rasterizador = color_coefficients;
-    }
+    TexCoord0 = TexCoord;
 }
 
