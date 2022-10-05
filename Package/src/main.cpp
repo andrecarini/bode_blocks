@@ -105,6 +105,7 @@ void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso n�
 // outras informações do programa. Definidas após main().
 void TextRendering_ShowHelp(GLFWwindow* window);
 void TextRendering_ShowFail(GLFWwindow *window);
+void TextRendering_ShowVictory(GLFWwindow *window);
 void TextRendering_ShowProjection(GLFWwindow* window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 void TextRendering_ShowBlockPosition(GLFWwindow *window);
@@ -544,6 +545,8 @@ int main()
             show_fail = true;
         }
 
+
+
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, PlayerTexture);
         glDrawElements(
@@ -559,9 +562,7 @@ int main()
         // Desenhamos o modelo da esfera
         glm::vec4 translator = FindPoint(t);
 
-        model = Matrix_Translate(translator.x, translator.y, translator.z);
-        if(translator.x == g_PositionX && translator.z == g_PositionZ)
-            printf("bateuuu");
+        model = Matrix_Translate(translator.x + 6.0f, translator.y, translator.z - 1.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 
         glBindVertexArray(g_VirtualScene["sphere"].vertex_array_object_id);
@@ -584,6 +585,11 @@ int main()
 
         if( show_fail ) {
             TextRendering_ShowFail(window);
+        }
+
+        if (block_position == 1.0f && g_PositionX == 7.0f && g_PositionZ == 4.0f)
+        {
+            TextRendering_ShowVictory(window);
         }
 
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
@@ -1417,6 +1423,20 @@ void TextRendering_ShowFail(GLFWwindow *window)
 
     char buffer[80];
     snprintf(buffer, 80, "Seu bloco caiu! Tente novamente!\n");
+
+    TextRendering_PrintString(window, buffer, -0.5f + pad / 10, 2 * pad / 10, 3.0f);
+}
+
+// Mostra mensagem de que o jogador morreu!
+void TextRendering_ShowVictory(GLFWwindow *window)
+{
+    if (!g_ShowInfoText)
+        return;
+
+    float pad = TextRendering_LineHeight(window);
+
+    char buffer[80];
+    snprintf(buffer, 80, "Parabens!\n");
 
     TextRendering_PrintString(window, buffer, -0.5f + pad / 10, 2 * pad / 10, 3.0f);
 }
