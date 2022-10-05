@@ -104,6 +104,7 @@ void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso n�
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
 void TextRendering_ShowHelp(GLFWwindow* window);
+void TextRendering_ShowFail(GLFWwindow *window);
 void TextRendering_ShowProjection(GLFWwindow* window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
 void TextRendering_ShowBlockPosition(GLFWwindow *window);
@@ -306,7 +307,6 @@ int main()
     GLint model_uniform           = glGetUniformLocation(program_id, "model"); // Variável da matriz "model"
     GLint view_uniform            = glGetUniformLocation(program_id, "view"); // Variável da matriz "view" em shader_vertex.glsl
     GLint projection_uniform      = glGetUniformLocation(program_id, "projection"); // Variável da matriz "projection" em shader_vertex.glsl
-    GLint render_as_black_uniform = glGetUniformLocation(program_id, "render_as_black"); // Variável booleana em shader_vertex.glsl
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
@@ -320,10 +320,18 @@ int main()
 
     glm::vec4 camera_position_c = glm::vec4(5.0f, 3.0f, 10.0f, 1.0f); // Ponto "c", centro da câmera
     float start=glfwGetTime();
+    float last_fail=glfwGetTime();
+    bool show_fail = false;
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
         float t=glfwGetTime()-start;
+        float time_since_last_fail = glfwGetTime()-last_fail;
+        if (time_since_last_fail > 4) {
+            show_fail = false;
+        }
+        
+        
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -411,7 +419,6 @@ int main()
         glBindTexture(GL_TEXTURE_2D, SkyTexture);
         glm::mat4 skybox = Matrix_Scale(100.0f, 100.0f, 100.0f) * Matrix_Translate(-0.5f, -0.5f, -0.5f);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(skybox));
-        glUniform1i(render_as_black_uniform, false);
         glDrawElements(
             g_VirtualScene["scenery_cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
             g_VirtualScene["scenery_cube_faces"].num_indices,
@@ -498,11 +505,6 @@ int main()
             // aplicada em todos os pontos.
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
-            // Informamos para a placa de vídeo (GPU) que a variável booleana
-            // "render_as_black" deve ser colocada como "false". Veja o arquivo
-            // "shader_vertex.glsl".
-            glUniform1i(render_as_black_uniform, false);
-
             // Pedimos para a GPU rasterizar os vértices do cubo apontados pelo
             // VAO como triângulos, formando as faces do cubo. Esta
             // renderização irá executar o Vertex Shader definido no arquivo
@@ -523,15 +525,24 @@ int main()
 
         //-------------------------------------- cubo jogador --------------------------------------------------//
         glm::mat4 model = Matrix_Translate(0.0f, 1.0f, 0.0f);
-        glUniform1i(render_as_black_uniform, false);
         model = model   * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ)
                         * Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
                         * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
                         * Matrix_Rotate_X(g_AngleX)
                         * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
-        if( failCheck(g_PositionX, g_PositionY, g_PositionZ) )
-            model = Matrix_Translate(0.0f, -25.0f, 0.0f);
+        if( failCheck(g_PositionX, g_PositionY, g_PositionZ) ) {
+            g_PositionX = 0.0f;
+            g_PositionY = 0.0f;
+            g_PositionZ = 0.0f;
+            block_position = 1.0f;
+            g_AngleX = 0.0f;
+            g_AngleY = 0.0f;
+            g_AngleZ = 0.0f;
+
+            last_fail = glfwGetTime();
+            show_fail = true;
+        }
 
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, PlayerTexture);
@@ -552,7 +563,6 @@ int main()
         if(translator.x == g_PositionX && translator.z == g_PositionZ)
             printf("bateuuu");
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-        glUniform1i(render_as_black_uniform, true);
 
         glBindVertexArray(g_VirtualScene["sphere"].vertex_array_object_id);
         glBindTexture(GL_TEXTURE_2D, SphereTexture);
@@ -572,14 +582,16 @@ int main()
         // Imprimimos na tela as infos de ajuda.
         //TextRendering_ShowHelp(window);
 
+        if( show_fail ) {
+            TextRendering_ShowFail(window);
+        }
+
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
 
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
-
-        //TextRendering_ShowBlockPosition(window);
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -1393,6 +1405,20 @@ void TextRendering_ShowHelp(GLFWwindow* window)
     snprintf(buffer, 80, "Movimento do cubo: SETAS | Toggle free-look: L | Movimento free-look: WASD\n");
 
     TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
+}
+
+// Mostra mensagem de que o jogador morreu!
+void TextRendering_ShowFail(GLFWwindow *window)
+{
+    if (!g_ShowInfoText)
+        return;
+
+    float pad = TextRendering_LineHeight(window);
+
+    char buffer[80];
+    snprintf(buffer, 80, "Seu bloco caiu! Tente novamente!\n");
+
+    TextRendering_PrintString(window, buffer, -0.5f + pad / 10, 2 * pad / 10, 3.0f);
 }
 
 // Escrevemos na tela qual matriz de projeção está sendo utilizada.
