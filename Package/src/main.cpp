@@ -81,7 +81,8 @@ struct ObjModel
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
 GLuint BuildTriangles(); // Constrói triângulos para renderização
-GLuint LoadShader_Vertex(const char* filename);   // Carrega um vertex shader
+GLuint BuildSceneryCube();
+GLuint LoadShader_Vertex(const char *filename); // Carrega um vertex shader
 GLuint LoadShader_Fragment(const char* filename); // Carrega um fragment shader
 void LoadShader(const char* filename, GLuint shader_id); // Função utilizada pelas duas acima
 GLuint CreateGpuProgram(GLuint vertex_shader_id, GLuint fragment_shader_id); // Cria um programa de GPU
@@ -105,6 +106,7 @@ void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso n�
 void TextRendering_ShowHelp(GLFWwindow* window);
 void TextRendering_ShowProjection(GLFWwindow* window);
 void TextRendering_ShowFramesPerSecond(GLFWwindow* window);
+void TextRendering_ShowBlockPosition(GLFWwindow *window);
 
 // Funções callback para comunicação com o sistema operacional e interação do
 // usuário. Veja mais comentários nas definições das mesmas, abaixo.
@@ -286,6 +288,8 @@ int main()
     // Construímos a representação de um triângulo
     GLuint vertex_array_object_id = BuildTriangles();
 
+    GLuint scenery_cube_VAO = BuildSceneryCube();
+
     // Inicializamos o código para renderização de texto.
     TextRendering_Init();
 
@@ -294,6 +298,7 @@ int main()
     GLuint ExitTexture = Load_Texture_BMP("exit_texture.bmp");
     GLuint PlayerTexture = Load_Texture_BMP("player_texture.bmp");
     GLuint SphereTexture = Load_Texture_BMP("sphere_texture.bmp");
+    GLuint SkyTexture = Load_Texture_BMP("sky_texture.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -313,7 +318,7 @@ int main()
     glm::mat4 the_model;
     glm::mat4 the_view;
 
-    glm::vec4 camera_position_c = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f); // Ponto "c", centro da câmera
+    glm::vec4 camera_position_c = glm::vec4(5.0f, 3.0f, 10.0f, 1.0f); // Ponto "c", centro da câmera
     float start=glfwGetTime();
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -336,11 +341,6 @@ int main()
         // Pedimos para a GPU utilizar o programa de GPU criado acima (contendo
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
-
-        // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
-        // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
-        // comentários detalhados dentro da definição de BuildTriangles().
-        glBindVertexArray(vertex_array_object_id);
 
         // Computamos a posição da câmera utilizando coordenadas esféricas.  As
         // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
@@ -376,7 +376,7 @@ int main()
         // Note que, no sistema de coordenadas da câmera, os planos near e far
         // estão no sentido negativo! Veja slides 176-204 do documento Aula_09_Projecoes.pdf.
         float nearplane = -0.1f;  // Posição do "near plane"
-        float farplane  = -25.0f; // Posição do "far plane"
+        float farplane  = -200.0f; // Posição do "far plane"
 
         if (g_UsePerspectiveProjection)
         {
@@ -404,6 +404,25 @@ int main()
         // efetivamente aplicadas em todos os pontos.
         glUniformMatrix4fv(view_uniform       , 1 , GL_FALSE , glm::value_ptr(view));
         glUniformMatrix4fv(projection_uniform , 1 , GL_FALSE , glm::value_ptr(projection));
+
+        // Desenha o cubo do cenário
+        glBindVertexArray(scenery_cube_VAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_2D, SkyTexture);
+        glm::mat4 skybox = Matrix_Scale(100.0f, 100.0f, 100.0f) * Matrix_Translate(-0.5f, -0.5f, -0.5f);
+        glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(skybox));
+        glUniform1i(render_as_black_uniform, false);
+        glDrawElements(
+            g_VirtualScene["scenery_cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
+            g_VirtualScene["scenery_cube_faces"].num_indices,
+            GL_UNSIGNED_INT,
+            (void *)g_VirtualScene["cube_faces"].first_index
+        );
+
+        // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
+        // vértices apontados pelo VAO criado pela função BuildTriangles(). Veja
+        // comentários detalhados dentro da definição de BuildTriangles().
+        glBindVertexArray(vertex_array_object_id);
 
         // Desenho do mapa (chão) feito de cópias do bloco
         for (int i = 1; i <= 35; ++i)
@@ -522,7 +541,6 @@ int main()
             GL_UNSIGNED_INT,
             (void*)g_VirtualScene["cube_faces"].first_index
         );
-
         //-------------------------------------- cubo jogador --------------------------------------------------//
 
         //---------------------------------------esfera--------------------------------------------------------//
@@ -552,7 +570,7 @@ int main()
         glBindVertexArray(0);
 
         // Imprimimos na tela as infos de ajuda.
-        TextRendering_ShowHelp(window);
+        //TextRendering_ShowHelp(window);
 
         // Imprimimos na informação sobre a matriz de projeção sendo utilizada.
         TextRendering_ShowProjection(window);
@@ -560,6 +578,8 @@ int main()
         // Imprimimos na tela informação sobre o número de quadros renderizados
         // por segundo (frames per second).
         TextRendering_ShowFramesPerSecond(window);
+
+        //TextRendering_ShowBlockPosition(window);
 
         // O framebuffer onde OpenGL executa as operações de renderização não
         // é o mesmo que está sendo mostrado para o usuário, caso contrário
@@ -583,167 +603,297 @@ int main()
     return 0;
 }
 
-// Constrói triângulos para futura renderização
-GLuint BuildTriangles()
+// Constrói cubo do cenário
+GLuint BuildSceneryCube()
 {
-    // Primeiro, definimos os atributos de cada vértice.
-
-    // A posição de cada vértice é definida por coeficientes em um sistema de
-    // coordenadas local de cada modelo geométrico. Note o uso de coordenadas
-    // homogêneas.  Veja as seguintes referências:
-    //
-    //  - slides 35-48 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //  - slides 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf;
-    //
-    // Este vetor "model_coefficients" define a GEOMETRIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    //
+    // Geometria: conjunto de vértices.
     GLfloat model_coefficients[] = {
-    // Vértices de um cubo
-    //    X      Y     Z     W
-        -0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 0
-        -0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 1
-         0.5f, -0.5f,  0.5f, 1.0f, // posição do vértice 2
-         0.5f,  0.5f,  0.5f, 1.0f, // posição do vértice 3
-        -0.5f,  0.5f, -0.5f, 1.0f, // posição do vértice 4
-        -0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 5
-         0.5f, -0.5f, -0.5f, 1.0f, // posição do vértice 6
-         0.5f,  0.5f, -0.5f, 1.0f  // posição do vértice 7
+        //    X      Y      Z     W
+                                      // face 0 
+           0.0f,  0.0f,  0.0f,  1.0f, // vértice 0
+           1.0f,  0.0f,  0.0f,  1.0f, // vértice 1
+           0.0f,  1.0f,  0.0f,  1.0f, // vértice 2
+           1.0f,  1.0f,  0.0f,  1.0f, // vértice 3
+
+                                      // face 1 
+           0.0f,  0.0f,  1.0f,  1.0f, // vértice 4
+           0.0f,  0.0f,  0.0f,  1.0f, // vértice 5
+           0.0f,  1.0f,  1.0f,  1.0f, // vértice 6
+           0.0f,  1.0f,  0.0f,  1.0f, // vértice 7
+
+                                      // face 2 
+           1.0f,  0.0f,  1.0f,  1.0f, // vértice 8
+           0.0f,  0.0f,  1.0f,  1.0f, // vértice 9
+           1.0f,  1.0f,  1.0f,  1.0f, // vértice 10
+           0.0f,  1.0f,  1.0f,  1.0f, // vértice 11
+
+                                      // face 3 
+           1.0f,  0.0f,  0.0f,  1.0f, // vértice 12
+           1.0f,  0.0f,  1.0f,  1.0f, // vértice 13
+           1.0f,  1.0f,  0.0f,  1.0f, // vértice 14
+           1.0f,  1.0f,  1.0f,  1.0f, // vértice 15
+
+                                      // face 4 
+           0.0f,  0.0f,  1.0f,  1.0f, // vértice 16
+           1.0f,  0.0f,  1.0f,  1.0f, // vértice 17
+           0.0f,  0.0f,  0.0f,  1.0f, // vértice 18
+           1.0f,  0.0f,  0.0f,  1.0f, // vértice 19
+
+                                      // face 5 
+           0.0f,  1.0f,  1.0f,  1.0f, // vértice 20
+           1.0f,  1.0f,  1.0f,  1.0f, // vértice 21
+           0.0f,  1.0f,  0.0f,  1.0f, // vértice 22
+           1.0f,  1.0f,  0.0f,  1.0f, // vértice 23
     };
 
-    // Criamos o identificador (ID) de um Vertex Buffer Object (VBO).  Um VBO é
-    // um buffer de memória que irá conter os valores de um certo atributo de
-    // um conjunto de vértices; por exemplo: posição, cor, normais, coordenadas
-    // de textura.  Neste exemplo utilizaremos vários VBOs, um para cada tipo de atributo.
-    // Agora criamos um VBO para armazenarmos um atributo: posição.
     GLuint VBO_model_coefficients_id;
     glGenBuffers(1, &VBO_model_coefficients_id);
 
-    // Criamos o identificador (ID) de um Vertex Array Object (VAO).  Um VAO
-    // contém a definição de vários atributos de um certo conjunto de vértices;
-    // isto é, um VAO irá conter ponteiros para vários VBOs.
     GLuint vertex_array_object_id;
     glGenVertexArrays(1, &vertex_array_object_id);
-
-    // "Ligamos" o VAO ("bind"). Informamos que iremos atualizar o VAO cujo ID
-    // está contido na variável "vertex_array_object_id".
     glBindVertexArray(vertex_array_object_id);
 
-    // "Ligamos" o VBO ("bind"). Informamos que o VBO cujo ID está contido na
-    // variável VBO_model_coefficients_id será modificado a seguir. A
-    // constante "GL_ARRAY_BUFFER" informa que esse buffer é de fato um VBO, e
-    // irá conter atributos de vértices.
     glBindBuffer(GL_ARRAY_BUFFER, VBO_model_coefficients_id);
-
-    // Alocamos memória para o VBO "ligado" acima. Como queremos armazenar
-    // nesse VBO todos os valores contidos no array "model_coefficients", pedimos
-    // para alocar um número de bytes exatamente igual ao tamanho ("size")
-    // desse array. A constante "GL_STATIC_DRAW" dá uma dica para o driver da
-    // GPU sobre como utilizaremos os dados do VBO. Neste caso, estamos dizendo
-    // que não pretendemos alterar tais dados (são estáticos: "STATIC"), e
-    // também dizemos que tais dados serão utilizados para renderizar ou
-    // desenhar ("DRAW").  Pense que:
-    //
-    //            glBufferData()  ==  malloc() do C  ==  new do C++.
-    //
     glBufferData(GL_ARRAY_BUFFER, sizeof(model_coefficients), NULL, GL_STATIC_DRAW);
-
-    // Finalmente, copiamos os valores do array model_coefficients para dentro do
-    // VBO "ligado" acima.  Pense que:
-    //
-    //            glBufferSubData()  ==  memcpy() do C.
-    //
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(model_coefficients), model_coefficients);
-
-    // Precisamos então informar um índice de "local" ("location"), o qual será
-    // utilizado no shader "shader_vertex.glsl" para acessar os valores
-    // armazenados no VBO "ligado" acima. Também, informamos a dimensão (número de
-    // coeficientes) destes atributos. Como em nosso caso são pontos em coordenadas
-    // homogêneas, temos quatro coeficientes por vértice (X,Y,Z,W). Isso define
-    // um tipo de dado chamado de "vec4" em "shader_vertex.glsl": um vetor com
-    // quatro coeficientes. Finalmente, informamos que os dados estão em ponto
-    // flutuante com 32 bits (GL_FLOAT).
-    // Esta função também informa que o VBO "ligado" acima em glBindBuffer()
-    // está dentro do VAO "ligado" acima por glBindVertexArray().
-    // Veja https://www.khronos.org/opengl/wiki/Vertex_Specification#Vertex_Buffer_Object
-    GLuint location = 0; // "(location = 0)" em "shader_vertex.glsl"
-    GLint  number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
+    GLuint location = 0;            // "(location = 0)" em "shader_vertex.glsl"
+    GLint number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
     glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
-
-    // "Ativamos" os atributos. Informamos que os atributos com índice de local
-    // definido acima, na variável "location", deve ser utilizado durante o
-    // rendering.
     glEnableVertexAttribArray(location);
-
-    // "Desligamos" o VBO, evitando assim que operações posteriores venham a
-    // alterar o mesmo. Isso evita bugs.
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // Agora repetimos todos os passos acima para atribuir um novo atributo a
-    // cada vértice: uma cor (veja slides 109-112 do documento Aula_03_Rendering_Pipeline_Grafico.pdf e slide 111 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    // Tal cor é definida como coeficientes RGBA: Red, Green, Blue, Alpha;
-    // isto é: Vermelho, Verde, Azul, Alpha (valor de transparência).
-    // Conversaremos sobre sistemas de cores nas aulas de Modelos de Iluminação.
+    // UV coords.: Texturas.
     GLfloat texture_coordinates[] = {
-    // Cores dos vértices do cubo
-    //  U     V
-        0.0f, 0.0f, // coordenada UV da textura no vértice 0
-        1.0f, 0.0f, // coordenada UV da textura no vértice 1
-        0.0f, 0.0f, // coordenada UV da textura no vértice 2
-        1.0f, 0.0f, // coordenada UV da textura no vértice 3
-        0.0f, 1.0f, // coordenada UV da textura no vértice 4
-        1.0f, 1.0f, // coordenada UV da textura no vértice 5
-        0.0f, 1.0f, // coordenada UV da textura no vértice 6
-        1.0f, 1.0f  // coordenada UV da textura no vértice 7
+        //  U       V
+                          // face 0
+            0.0f,   0.0f, // coordenada UV  0
+            1.0f,   0.0f, // coordenada UV  1
+            0.0f,   1.0f, // coordenada UV  2
+            1.0f,   1.0f, // coordenada UV  3
+
+                          // face 1
+            0.0f,   0.0f, // coordenada UV  4
+            1.0f,   0.0f, // coordenada UV  5
+            0.0f,   1.0f, // coordenada UV  6
+            1.0f,   1.0f, // coordenada UV  7
+                          
+                          // face 2
+            0.0f,   0.0f, // coordenada UV  8
+            1.0f,   0.0f, // coordenada UV  9
+            0.0f,   1.0f, // coordenada UV  10
+            1.0f,   1.0f, // coordenada UV  11
+                          
+                          // face 3
+            0.0f,   0.0f, // coordenada UV  12
+            1.0f,   0.0f, // coordenada UV  13
+            0.0f,   1.0f, // coordenada UV  14
+            1.0f,   1.0f, // coordenada UV  15
+
+                          // face 4
+            0.0f,   0.0f, // coordenada UV  16
+            1.0f,   0.0f, // coordenada UV  17
+            0.0f,   1.0f, // coordenada UV  18
+            1.0f,   1.0f, // coordenada UV  19
+
+                          // face 5
+            0.0f,   0.0f, // coordenada UV  20
+            1.0f,   0.0f, // coordenada UV  21
+            0.0f,   1.0f, // coordenada UV  22
+            1.0f,   1.0f, // coordenada UV  23
     };
+
     GLuint VBO_texture_coordinates_id;
     glGenBuffers(1, &VBO_texture_coordinates_id);
     glBindBuffer(GL_ARRAY_BUFFER, VBO_texture_coordinates_id);
     glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coordinates), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texture_coordinates), texture_coordinates);
     location = TEXCOORD_SHADER_LOCATION; // "(location = 1)" em "shader_vertex.glsl"
-    number_of_dimensions = 2; // vec2 em "shader_vertex.glsl"
+    number_of_dimensions = 2;            // vec2 em "shader_vertex.glsl"
     glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
     glEnableVertexAttribArray(location);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    // Vamos então definir polígonos utilizando os vértices do array
-    // model_coefficients.
-    //
-    // Para referência sobre os modos de renderização, veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf.
-    //
-    // Este vetor "indices" define a TOPOLOGIA (veja slides 103-110 do documento Aula_04_Modelagem_Geometrica_3D.pdf).
-    //
+    // Triângulos.
     GLuint indices[] = {
-    // Definimos os índices dos vértices que definem as FACES de um cubo
-    // através de 12 triângulos que serão desenhados com o modo de renderização
-    // GL_TRIANGLES.
-        0, 1, 2, // triângulo 1
-        7, 6, 5, // triângulo 2
-        3, 2, 6, // triângulo 3
-        4, 0, 3, // triângulo 4
-        4, 5, 1, // triângulo 5
-        1, 5, 6, // triângulo 6
-        0, 2, 3, // triângulo 7
-        7, 5, 4, // triângulo 8
-        3, 6, 7, // triângulo 9
-        4, 3, 7, // triângulo 10
-        4, 1, 0, // triângulo 11
-        1, 6, 2, // triângulo 12
-    // Definimos os índices dos vértices que definem as ARESTAS de um cubo
-    // através de 12 linhas que serão desenhadas com o modo de renderização
-    // GL_LINES.
-        0, 1, // linha 1
-        1, 2, // linha 2
-        2, 3, // linha 3
-        3, 0, // linha 4
-        0, 4, // linha 5
-        4, 7, // linha 6
-        7, 6, // linha 7
-        6, 2, // linha 8
-        6, 5, // linha 9
-        5, 4, // linha 10
-        5, 1, // linha 11
-        7, 3 // linha 12
+
+                 // face 0
+        0, 1, 2, // triângulo 0
+        1, 2, 3, // triângulo 1
+
+                 // face 1
+        4, 5, 6, // triângulo 2
+        5, 6, 7, // triângulo 3
+                 
+                    // face 2
+        8, 9,  10,  // triângulo 4
+        9, 10, 11,  // triângulo 5
+
+                    // face 3
+        12, 13, 14, // triângulo 6
+        13, 14, 15, // triângulo 7
+
+                    // face 4
+        16, 17, 18, // triângulo 8
+        17, 18, 19, // triângulo 9
+
+                    // face 5
+        20, 21, 22, // triângulo 10
+        21, 22, 23, // triângulo 11
+    };
+
+    SceneObject cube_faces;
+    cube_faces.name = "Cubo (faces texturizadas)";
+    cube_faces.first_index = 0;
+    cube_faces.num_indices = sizeof(indices) / sizeof(indices[0]);
+    cube_faces.rendering_mode = GL_TRIANGLES; // Índices correspondem ao tipo de rasterização GL_TRIANGLES.
+    g_VirtualScene["scenery_cube_faces"] = cube_faces;
+
+    GLuint indices_id;
+    glGenBuffers(1, &indices_id);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, sizeof(indices), indices);
+    glBindVertexArray(0);
+
+    return vertex_array_object_id;
+}
+
+// Constrói triângulos para futura renderização
+GLuint BuildTriangles()
+{
+    // Geometria: conjunto de vértices.
+    GLfloat model_coefficients[] = {
+        //    X      Y      Z     W
+        // face 0
+        -0.5f, -0.5f, -0.5f, 1.0f, // vértice 0
+        0.5f, -0.5f, -0.5f, 1.0f,  // vértice 1
+        -0.5f, 0.5f, -0.5f, 1.0f,  // vértice 2
+        0.5f, 0.5f, -0.5f, 1.0f,   // vértice 3
+
+        // face 1
+        -0.5f, -0.5f, 0.5f, 1.0f,  // vértice 4
+        -0.5f, -0.5f, -0.5f, 1.0f, // vértice 5
+        -0.5f, 0.5f, 0.5f, 1.0f,   // vértice 6
+        -0.5f, 0.5f, -0.5f, 1.0f,  // vértice 7
+
+        // face 2
+        0.5f, -0.5f, 0.5f, 1.0f,  // vértice 8
+        -0.5f, -0.5f, 0.5f, 1.0f, // vértice 9
+        0.5f, 0.5f, 0.5f, 1.0f,   // vértice 10
+        -0.5f, 0.5f, 0.5f, 1.0f,  // vértice 11
+
+        // face 3
+        0.5f, -0.5f, -0.5f, 1.0f, // vértice 12
+        0.5f, -0.5f, 0.5f, 1.0f,  // vértice 13
+        0.5f, 0.5f, -0.5f, 1.0f,  // vértice 14
+        0.5f, 0.5f, 0.5f, 1.0f,   // vértice 15
+
+        // face 4
+        -0.5f, -0.5f, 0.5f, 1.0f,  // vértice 16
+        0.5f, -0.5f, 0.5f, 1.0f,   // vértice 17
+        -0.5f, -0.5f, -0.5f, 1.0f, // vértice 18
+        0.5f, -0.5f, -0.5f, 1.0f,  // vértice 19
+
+        // face 5
+        -0.5f, 0.5f, 0.5f, 1.0f,  // vértice 20
+        0.5f, 0.5f, 0.5f, 1.0f,   // vértice 21
+        -0.5f, 0.5f, -0.5f, 1.0f, // vértice 22
+        0.5f, 0.5f, -0.5f, 1.0f,  // vértice 23
+    };
+
+    GLuint VBO_model_coefficients_id;
+    glGenBuffers(1, &VBO_model_coefficients_id);
+
+    GLuint vertex_array_object_id;
+    glGenVertexArrays(1, &vertex_array_object_id);
+    glBindVertexArray(vertex_array_object_id);
+
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_model_coefficients_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(model_coefficients), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(model_coefficients), model_coefficients);
+    GLuint location = 0;            // "(location = 0)" em "shader_vertex.glsl"
+    GLint number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
+    glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(location);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // UV coords.: Texturas.
+    GLfloat texture_coordinates[] = {
+        //  U       V
+        // face 0
+        0.0f, 0.0f, // coordenada UV  0
+        1.0f, 0.0f, // coordenada UV  1
+        0.0f, 1.0f, // coordenada UV  2
+        1.0f, 1.0f, // coordenada UV  3
+
+        // face 1
+        0.0f, 0.0f, // coordenada UV  4
+        1.0f, 0.0f, // coordenada UV  5
+        0.0f, 1.0f, // coordenada UV  6
+        1.0f, 1.0f, // coordenada UV  7
+
+        // face 2
+        0.0f, 0.0f, // coordenada UV  8
+        1.0f, 0.0f, // coordenada UV  9
+        0.0f, 1.0f, // coordenada UV  10
+        1.0f, 1.0f, // coordenada UV  11
+
+        // face 3
+        0.0f, 0.0f, // coordenada UV  12
+        1.0f, 0.0f, // coordenada UV  13
+        0.0f, 1.0f, // coordenada UV  14
+        1.0f, 1.0f, // coordenada UV  15
+
+        // face 4
+        0.0f, 0.0f, // coordenada UV  16
+        1.0f, 0.0f, // coordenada UV  17
+        0.0f, 1.0f, // coordenada UV  18
+        1.0f, 1.0f, // coordenada UV  19
+
+        // face 5
+        0.0f, 0.0f, // coordenada UV  20
+        1.0f, 0.0f, // coordenada UV  21
+        0.0f, 1.0f, // coordenada UV  22
+        1.0f, 1.0f, // coordenada UV  23
+    };
+
+    GLuint VBO_texture_coordinates_id;
+    glGenBuffers(1, &VBO_texture_coordinates_id);
+    glBindBuffer(GL_ARRAY_BUFFER, VBO_texture_coordinates_id);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(texture_coordinates), NULL, GL_STATIC_DRAW);
+    glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(texture_coordinates), texture_coordinates);
+    location = TEXCOORD_SHADER_LOCATION; // "(location = 1)" em "shader_vertex.glsl"
+    number_of_dimensions = 2;            // vec2 em "shader_vertex.glsl"
+    glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
+    glEnableVertexAttribArray(location);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+    // Triângulos.
+    GLuint indices[] = {
+
+        // face 0
+        0, 1, 2, // triângulo 0
+        1, 2, 3, // triângulo 1
+
+        // face 1
+        4, 5, 6, // triângulo 2
+        5, 6, 7, // triângulo 3
+
+        // face 2
+        8, 9, 10,  // triângulo 4
+        9, 10, 11, // triângulo 5
+
+        // face 3
+        12, 13, 14, // triângulo 6
+        13, 14, 15, // triângulo 7
+
+        // face 4
+        16, 17, 18, // triângulo 8
+        17, 18, 19, // triângulo 9
+
+        // face 5
+        20, 21, 22, // triângulo 10
+        21, 22, 23, // triângulo 11
     };
 
     // Criamos um primeiro objeto virtual (SceneObject) que se refere às faces
@@ -756,17 +906,6 @@ GLuint BuildTriangles()
 
     // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
     g_VirtualScene["cube_faces"] = cube_faces;
-
-    // Criamos um segundo objeto virtual (SceneObject) que se refere às arestas
-    // pretas do cubo.
-    SceneObject cube_edges;
-    cube_edges.name           = "Cubo (arestas pretas)";
-    cube_edges.first_index    = (36*sizeof(GLuint)); // Primeiro índice está em indices[36]
-    cube_edges.num_indices    = 24; // Último índice está em indices[59]; total de 24 índices.
-    cube_edges.rendering_mode = GL_LINES; // Índices correspondem ao tipo de rasterização GL_LINES.
-
-    // Adicionamos o objeto criado acima na nossa cena virtual (g_VirtualScene).
-    g_VirtualScene["cube_edges"] = cube_edges;
 
     // Criamos um buffer OpenGL para armazenar os índices acima
     GLuint indices_id;
@@ -1307,6 +1446,21 @@ void TextRendering_ShowFramesPerSecond(GLFWwindow* window)
     TextRendering_PrintString(window, buffer, 1.0f-(numchars + 1)*charwidth, 1.0f-lineheight, 1.0f);
 }
 
+// Escrevemos na tela os ângulos de Euler definidos nas variáveis globais
+// g_AngleX, g_AngleY, e g_AngleZ.
+void TextRendering_ShowBlockPosition(GLFWwindow *window)
+{
+    if (!g_ShowInfoText)
+        return;
+
+    float pad = TextRendering_LineHeight(window);
+
+    char buffer[80];
+    snprintf(buffer, 80, "Player: Config: (%i) | Pos: (%.2f) X, (%.2f) Y, (%.2f) Z\n", block_position, g_PositionX, g_PositionY, g_PositionZ);
+
+    TextRendering_PrintString(window, buffer, -1.0f + pad / 10, -1.0f + 2 * pad / 10, 1.0f);
+}
+
 // Função que computa as normais de um ObjModel, caso elas não tenham sido
 // especificadas dentro do arquivo ".obj"
 void ComputeNormals(ObjModel* model)
@@ -1545,17 +1699,36 @@ glm::vec4 FindPoint(float t)
 
 bool failCheck(float x, float y, float z)
 {
-    if (
-        ((x >= 4.5 && x <= 5) && ((z >= 4 && z <= 4.5))) ||
-        ((-0.5 <= x && x <= 2.5) && (-0.5<= z && z<= 2.5)) ||
-        ((x >= 9.0 && x <= 9.5) && (z >= 2.0 && z <= 4.5)) ||
-        ((x >= 0.5 && x <= 2.5) && (z == 3)) ||
-        ((x >= 2.5 && x <= 5.5) && (z >= 0.5 && z <= 3.5)) ||
-        ((x >= 5.5 && x <= 8.5) && (z >= 1.5 && z <= 5.5)) )
-            return false;
-
-    else
-            return true;
+    if (block_position == 1) {
+        // Bloco está de pé
+        if (g_PositionZ == 0 && g_PositionX >= 0 && g_PositionX <= 2) return false;
+        if (g_PositionZ == 1 && g_PositionX >= 0 && g_PositionX <= 5) return false;
+        if (g_PositionZ == 2 && g_PositionX >= 0 && g_PositionX <= 8) return false;
+        if (g_PositionZ == 3 && g_PositionX >= 1 && g_PositionX <= 9) return false;
+        if (g_PositionZ == 4 && g_PositionX >= 5 && g_PositionX <= 9) return false;
+        if (g_PositionZ == 5 && g_PositionX >= 6 && g_PositionX <= 8) return false;
+    } 
+    
+    if (block_position == 2) {
+        // Bloco está deitado paralelo ao eixo Z
+        if (g_PositionZ == 0.5 && g_PositionX >= 0 && g_PositionX <= 2) return false;
+        if (g_PositionZ == 1.5 && g_PositionX >= 0 && g_PositionX <= 5) return false;
+        if (g_PositionZ == 2.5 && g_PositionX >= 1 && g_PositionX <= 8) return false;
+        if (g_PositionZ == 3.5 && g_PositionX >= 5 && g_PositionX <= 9) return false;
+        if (g_PositionZ == 4.5 && g_PositionX >= 6 && g_PositionX <= 8) return false;
+    }
+    
+    if (block_position == 3) {
+        // Bloco está deitado paralelo ao eixo X
+        if (g_PositionZ == 0 && g_PositionX >= 0.5 && g_PositionX <= 1.5) return false;
+        if (g_PositionZ == 1 && g_PositionX >= 0.5 && g_PositionX <= 4.5) return false;
+        if (g_PositionZ == 2 && g_PositionX >= 0.5 && g_PositionX <= 7.5) return false;
+        if (g_PositionZ == 3 && g_PositionX >= 1.5 && g_PositionX <= 8.5) return false;
+        if (g_PositionZ == 4 && g_PositionX >= 5.5 && g_PositionX <= 8.5) return false;
+        if (g_PositionZ == 5 && g_PositionX >= 6.5 && g_PositionX <= 7.5) return false;
+    } 
+    
+    return true;
 }
 
 
