@@ -277,9 +277,11 @@ int main()
 
     //LoadShadersFromFiles();
     // Construímos a representação de objetos geométricos através de malhas de triângulos
-    ObjModel spheremodel("esfera_vermelha.obj");
-    ComputeNormals(&spheremodel);
-    BuildTrianglesAndAddToVirtualScene(&spheremodel);
+    //ObjModel spheremodel("esfera_vermelha.obj");
+    //BuildTrianglesAndAddToVirtualScene(&spheremodel);
+
+    ObjModel catmodel("cat.obj");
+    BuildTrianglesAndAddToVirtualScene(&catmodel);
 
     GLuint vertex_shader_id = LoadShader_Vertex("../../src/shader_vertex.glsl");
     GLuint fragment_shader_id = LoadShader_Fragment("../../src/shader_fragment.glsl");
@@ -301,6 +303,8 @@ int main()
     GLuint PlayerTexture = Load_Texture_BMP("player_texture.bmp");
     GLuint SphereTexture = Load_Texture_BMP("marble_texture_2.bmp");
     GLuint SkyTexture = Load_Texture_BMP("sky_texture.bmp");
+    GLuint CatTexture = Load_Texture_BMP("cat_texture.bmp");
+
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -587,6 +591,45 @@ int main()
         glBlendEquation(GL_FUNC_ADD);
 
         //---------------------------------------esfera--------------------------------------------------------//
+
+        //---------------------------------------gatinho-------------------------------------------------------//
+        model =  Matrix_Translate(-5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f)  * Matrix_Rotate_Y(8*t);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+
+        //glBlendFunc(GL_CONSTANT_ALPHA, GL_DST_ALPHA);
+        //glBlendEquation(GL_MAX);
+        //glBlendColor(1.000, 0.012, 0.012, 0.200);
+
+        glBindVertexArray(g_VirtualScene["cat"].vertex_array_object_id);
+        glBindTexture(GL_TEXTURE_2D, CatTexture);
+        glDrawElements(
+            g_VirtualScene["cat"].rendering_mode,
+            g_VirtualScene["cat"].num_indices,
+            GL_UNSIGNED_INT,
+            (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
+        );
+
+        model =  Matrix_Translate(5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(-8*t);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glDrawElements(
+            g_VirtualScene["cat"].rendering_mode,
+            g_VirtualScene["cat"].num_indices,
+            GL_UNSIGNED_INT,
+            (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
+        );
+
+        model =  Matrix_Translate(15.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(t*8);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glDrawElements(
+            g_VirtualScene["cat"].rendering_mode,
+            g_VirtualScene["cat"].num_indices,
+            GL_UNSIGNED_INT,
+            (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
+        );
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
+        //---------------------------------------gatinho-------------------------------------------------------//
 
         // "Desligamos" o VAO, evitando assim que operações posteriores venham a
         // alterar o mesmo. Isso evita bugs.
