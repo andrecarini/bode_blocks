@@ -43,6 +43,7 @@
 // Headers locais, definidos na pasta "include/"
 #include "utils.h"
 #include "matrices.h"
+#include "collisions.h"
 
 // Defines
 #define TAO 0.7
@@ -114,9 +115,6 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mode
 void MouseButtonCallback(GLFWwindow* window, int button, int action, int mods);
 void CursorPosCallback(GLFWwindow* window, double xpos, double ypos);
 void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset);
-
-// Lógica do jogo
-bool failCheck(float x, float y, float z);
 
 // Carregamento de imagens para textura
 GLuint Load_Texture_BMP(const char *file_path);
@@ -518,7 +516,7 @@ int main()
                         * Matrix_Rotate_X(g_AngleX)
                         * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
-        if( failCheck(g_PositionX, g_PositionY, g_PositionZ) ) {
+        if( death_collision(g_PositionX, g_PositionY, g_PositionZ) ) {
             g_PositionX = 0.0f;
             g_PositionY = 0.0f;
             g_PositionZ = 0.0f;
@@ -1631,38 +1629,4 @@ glm::vec4 FindPoint(float t)
    }
 
  return(c);
-}
-
-bool failCheck(float x, float y, float z)
-{
-    if (block_position == 1) {
-        // Bloco está de pé
-        if (g_PositionZ == 0 && g_PositionX >= 0 && g_PositionX <= 2) return false;
-        if (g_PositionZ == 1 && g_PositionX >= 0 && g_PositionX <= 5) return false;
-        if (g_PositionZ == 2 && g_PositionX >= 0 && g_PositionX <= 8) return false;
-        if (g_PositionZ == 3 && g_PositionX >= 1 && g_PositionX <= 9) return false;
-        if (g_PositionZ == 4 && g_PositionX >= 5 && g_PositionX <= 9) return false;
-        if (g_PositionZ == 5 && g_PositionX >= 6 && g_PositionX <= 8) return false;
-    } 
-    
-    if (block_position == 2) {
-        // Bloco está deitado paralelo ao eixo Z
-        if (g_PositionZ == 0.5 && g_PositionX >= 0 && g_PositionX <= 2) return false;
-        if (g_PositionZ == 1.5 && g_PositionX >= 0 && g_PositionX <= 5) return false;
-        if (g_PositionZ == 2.5 && g_PositionX >= 1 && g_PositionX <= 8) return false;
-        if (g_PositionZ == 3.5 && g_PositionX >= 5 && g_PositionX <= 9) return false;
-        if (g_PositionZ == 4.5 && g_PositionX >= 6 && g_PositionX <= 8) return false;
-    }
-    
-    if (block_position == 3) {
-        // Bloco está deitado paralelo ao eixo X
-        if (g_PositionZ == 0 && g_PositionX >= 0.5 && g_PositionX <= 1.5) return false;
-        if (g_PositionZ == 1 && g_PositionX >= 0.5 && g_PositionX <= 4.5) return false;
-        if (g_PositionZ == 2 && g_PositionX >= 0.5 && g_PositionX <= 7.5) return false;
-        if (g_PositionZ == 3 && g_PositionX >= 1.5 && g_PositionX <= 8.5) return false;
-        if (g_PositionZ == 4 && g_PositionX >= 5.5 && g_PositionX <= 8.5) return false;
-        if (g_PositionZ == 5 && g_PositionX >= 6.5 && g_PositionX <= 7.5) return false;
-    } 
-    
-    return true;
 }
