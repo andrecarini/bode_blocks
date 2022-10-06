@@ -212,7 +212,7 @@ int main()
     // Criamos uma janela do sistema operacional, com 800 colunas e 800 linhas
     // de pixels, e com título "INF01047 ...".
     GLFWwindow* window;
-    window = glfwCreateWindow(800, 800, "INF01047 - Seu Cartao - Seu Nome", NULL, NULL);
+    window = glfwCreateWindow(800, 800, "INF01047 - 287711-Aline Machado, 00260843-Andre Carini, ", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -277,7 +277,7 @@ int main()
 
     //LoadShadersFromFiles();
     // Construímos a representação de objetos geométricos através de malhas de triângulos
-    ObjModel spheremodel("sphere.obj");
+    ObjModel spheremodel("esfera_vermelha.obj");
     ComputeNormals(&spheremodel);
     BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
@@ -299,7 +299,7 @@ int main()
     GLuint FloorTexture = Load_Texture_BMP("floor_texture.bmp");
     GLuint ExitTexture = Load_Texture_BMP("exit_texture.bmp");
     GLuint PlayerTexture = Load_Texture_BMP("player_texture.bmp");
-    GLuint SphereTexture = Load_Texture_BMP("sphere_texture.bmp");
+    GLuint SphereTexture = Load_Texture_BMP("marble_texture_2.bmp");
     GLuint SkyTexture = Load_Texture_BMP("sky_texture.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
@@ -311,6 +311,7 @@ int main()
 
     // Habilitamos o Z-buffer. Veja slides 104-116 do documento Aula_09_Projecoes.pdf.
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
 
     glm::vec4 FindPoint(float t);
     // Variáveis auxiliares utilizadas para chamada à função
@@ -323,6 +324,7 @@ int main()
     float start=glfwGetTime();
     float last_fail=glfwGetTime();
     bool show_fail = false;
+
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
     {
@@ -424,7 +426,7 @@ int main()
             g_VirtualScene["scenery_cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
             g_VirtualScene["scenery_cube_faces"].num_indices,
             GL_UNSIGNED_INT,
-            (void *)g_VirtualScene["cube_faces"].first_index
+            (void *)g_VirtualScene["scenery_cube_faces"].first_index
         );
 
         // "Ligamos" o VAO. Informamos que queremos utilizar os atributos de
@@ -489,7 +491,7 @@ int main()
             else if (i == 27)   { model = Matrix_Translate(8.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
             else if (i == 28)   { model = Matrix_Translate(6.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 29)   { model = Matrix_Translate(7.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 29)   { model = Matrix_Translate(7.0f, -0.1f, 4.0f) * Matrix_Scale(0.95f, 0.2f, 0.95f); }
             else if (i == 30)   { model = Matrix_Translate(8.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
             else if (i == 31)   { model = Matrix_Translate(6.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
@@ -516,12 +518,17 @@ int main()
             // Veja a definição de g_VirtualScene["cube_faces"] dentro da
             // função BuildTriangles(), e veja a documentação da função
             // glDrawElements() em http://docs.gl/gl3/glDrawElements.
+
+            if (i == 29) { glBlendFunc(GL_DST_ALPHA, GL_DST_ALPHA); }
+
             glDrawElements(
                 g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
                 g_VirtualScene["cube_faces"].num_indices,
                 GL_UNSIGNED_INT,
                 (void*)g_VirtualScene["cube_faces"].first_index
             );
+
+            if (i == 29) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); }
         }
 
         //-------------------------------------- cubo jogador --------------------------------------------------//
@@ -545,8 +552,6 @@ int main()
             show_fail = true;
         }
 
-
-
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, PlayerTexture);
         glDrawElements(
@@ -562,18 +567,25 @@ int main()
         // Desenhamos o modelo da esfera
         glm::vec4 translator = FindPoint(t);
 
-        model = Matrix_Translate(translator.x + 6.0f, translator.y, translator.z - 1.0f);
+        model = Matrix_Translate(translator.x + 6.0f, translator.y + 0.4, translator.z - 1.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 
-        glBindVertexArray(g_VirtualScene["sphere"].vertex_array_object_id);
+        //glBlendFunc(GL_CONSTANT_ALPHA, GL_DST_ALPHA);
+        //glBlendEquation(GL_MAX);
+        //glBlendColor(1.000, 0.012, 0.012, 0.200);
+
+        glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
         glBindTexture(GL_TEXTURE_2D, SphereTexture);
         glDrawElements(
-            g_VirtualScene["sphere"].rendering_mode,
-            g_VirtualScene["sphere"].num_indices,
+            g_VirtualScene["esfera_vermelha"].rendering_mode,
+            g_VirtualScene["esfera_vermelha"].num_indices,
             GL_UNSIGNED_INT,
-            (void*)(g_VirtualScene["sphere"].first_index * sizeof(GLuint))
-
+            (void*)(g_VirtualScene["esfera_vermelha"].first_index * sizeof(GLuint))
         );
+
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glBlendEquation(GL_FUNC_ADD);
+
         //---------------------------------------esfera--------------------------------------------------------//
 
         // "Desligamos" o VAO, evitando assim que operações posteriores venham a
@@ -1664,7 +1676,7 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
         glBindBuffer(GL_ARRAY_BUFFER, VBO_normal_coefficients_id);
         glBufferData(GL_ARRAY_BUFFER, normal_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, normal_coefficients.size() * sizeof(float), normal_coefficients.data());
-        location = 1; // "(location = 1)" em "shader_vertex.glsl"
+        location = 2; // "(location = 2)" em "shader_vertex.glsl"
         number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
         glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
         glEnableVertexAttribArray(location);
@@ -1678,7 +1690,7 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
         glBindBuffer(GL_ARRAY_BUFFER, VBO_texture_coefficients_id);
         glBufferData(GL_ARRAY_BUFFER, texture_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
         glBufferSubData(GL_ARRAY_BUFFER, 0, texture_coefficients.size() * sizeof(float), texture_coefficients.data());
-        location = 2; // "(location = 1)" em "shader_vertex.glsl"
+        location = 1; // "(location = 1)" em "shader_vertex.glsl"
         number_of_dimensions = 2; // vec2 em "shader_vertex.glsl"
         glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
         glEnableVertexAttribArray(location);
