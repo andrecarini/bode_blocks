@@ -42,8 +42,6 @@
 					<Add option="-static-libgcc" />
 					<Add option="-static" />
 					<Add option="lib\libglfw3.a -lgdi32 -lopengl32" />
-					<Add option="-lirrKlang" />
-					<Add library="lib/irrKlang.lib" />
 					<Add directory="lib" />
 				</Linker>
 			</Target>
@@ -55,8 +53,6 @@
 		</Compiler>
 		<Linker>
 			<Add option="lib\libglfw3.a -lgdi32 -lopengl32" />
-			<Add option="-lirrKlang" />
-			<Add library="lib/irrKlang.lib" />
 			<Add directory="lib" />
 		</Linker>
 		<Unit filename="include/GLFW/glfw3.h" />

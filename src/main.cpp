@@ -32,9 +32,6 @@
 #include <glad/glad.h>   // Criação de contexto OpenGL 3.3
 #include <GLFW/glfw3.h>  // Criação de janelas do sistema operacional
 
-// Biblioteca de áudio
-#include <irrKlang/irrKlang.h>
-
 // Headers da biblioteca GLM: criação de matrizes e vetores.
 #include <glm/mat4x4.hpp>
 #include <glm/vec4.hpp>
@@ -50,9 +47,6 @@
 // Defines
 #define TAO 0.7
 #define TEXCOORD_SHADER_LOCATION 1
-
-using namespace irrklang;
-#pragma comment(lib, "irrKlang.lib") // link with irrKlang.dll
 
 // Estrutura que representa um modelo geométrico carregado a partir de um
 // arquivo ".obj". Veja https://en.wikipedia.org/wiki/Wavefront_.obj_file .
@@ -81,7 +75,6 @@ struct ObjModel
     }
 };
 
-
 // Declaração de várias funções utilizadas em main().  Essas estão definidas
 // logo após a definição de main() neste arquivo.
 GLuint BuildTriangles(); // Constrói triângulos para renderização
@@ -103,7 +96,6 @@ void TextRendering_PrintMatrixVectorProduct(GLFWwindow* window, glm::mat4 M, glm
 void TextRendering_PrintMatrixVectorProductMoreDigits(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void TextRendering_PrintMatrixVectorProductDivW(GLFWwindow* window, glm::mat4 M, glm::vec4 v, float x, float y, float scale = 1.0f);
 void BuildTrianglesAndAddToVirtualScene(ObjModel*); // Constrói representação de um ObjModel como malha de triângulos para renderização
-void ComputeNormals(ObjModel* model); // Computa normais de um ObjModel, caso não existam.
 
 // Funções abaixo renderizam como texto na janela OpenGL algumas matrizes e
 // outras informações do programa. Definidas após main().
@@ -255,40 +247,13 @@ int main()
 
     printf("GPU: %s, %s, OpenGL %s, GLSL %s\n", vendor, renderer, glversion, glslversion);
 
-    // Carregamos os shaders de vértices e de fragmentos que serão utilizados
-    // para renderização. Veja slides 180-200 do documento Aula_03_Rendering_Pipeline_Grafico.pdf.
-    //
-    // Note que o caminho para os arquivos "shader_vertex.glsl" e
-    // "shader_fragment.glsl" estão fixados, sendo que assumimos a existência
-    // da seguinte estrutura no sistema de arquivos:
-    //
-    //    + FCG_Lab_0X/
-    //    |
-    //    +--+ bin/
-    //    |  |
-    //    |  +--+ Release/  (ou Debug/ ou Linux/)
-    //    |     |
-    //    |     o-- main.exe
-    //    |
-    //    +--+ src/
-    //       |
-    //       o-- shader_vertex.glsl
-    //       |
-    //       o-- shader_fragment.glsl
-    //       |
-    //       o-- ...
-    //
-
-    //LoadShadersFromFiles();
-    // Construímos a representação de objetos geométricos através de malhas de triângulos
-    
+    // Carrega modelo do gatinho
     struct ObjModel catmodel("../data/cat.obj");
     BuildTrianglesAndAddToVirtualScene(&catmodel);
 
-    //struct ObjModel spheremodel("esfera_vermelha.obj");
-    //BuildTrianglesAndAddToVirtualScene(&spheremodel);
-
-    
+    // Carrega modelo da esfera
+    struct ObjModel spheremodel("../data/esfera_vermelha.obj");
+    BuildTrianglesAndAddToVirtualScene(&spheremodel);
 
     GLuint vertex_shader_id = LoadShader_Vertex("../src/shader_vertex.glsl");
     GLuint fragment_shader_id = LoadShader_Fragment("../src/shader_fragment.glsl");
@@ -335,10 +300,6 @@ int main()
     float start=glfwGetTime();
     float last_fail=glfwGetTime();
     bool show_fail = false;
-
-    //ISoundEngine* engine = createIrrKlangDevice();
-    //if (!engine)
-    //  return 0; // error starting up the engine
 
     // Ficamos em loop, renderizando, até que o usuário feche a janela
     while (!glfwWindowShouldClose(window))
@@ -534,8 +495,23 @@ int main()
             if (i == 29) { glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA); }
         }
 
+        //---------------------------------------esfera inimiga--------------------------------------------------------//
+        t=(1+sin(t))/2;
+        glm::vec4 translator = FindPoint(t);
+
+        glm::mat4 model = Matrix_Translate(4.0f, 0.7f, 2 * translator.z - 3.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
+        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glBindTexture(GL_TEXTURE_2D, SphereTexture);
+        glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
+        glDrawElements(
+            g_VirtualScene["esfera_vermelha"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
+            g_VirtualScene["esfera_vermelha"].num_indices,
+            GL_UNSIGNED_INT,
+            (void *)g_VirtualScene["cube_faces"].first_index);
+        //---------------------------------------esfera inimiga--------------------------------------------------------//
+
         //-------------------------------------- cubo jogador --------------------------------------------------//
-        glm::mat4 model = Matrix_Translate(0.0f, 1.0f, 0.0f);
+        model = Matrix_Translate(0.0f, 1.0f, 0.0f);
         model = model   * Matrix_Translate(g_PositionX, g_PositionY, g_PositionZ)
                         * Matrix_Rotate_Z(g_AngleZ)  // TERCEIRO rotação Z de Euler
                         * Matrix_Rotate_Y(g_AngleY)  // SEGUNDO  rotação Y de Euler
@@ -558,6 +534,7 @@ int main()
         glBlendFunc(GL_DST_ALPHA, GL_DST_ALPHA);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, PlayerTexture);
+        glBindVertexArray(vertex_array_object_id);
         glDrawElements(
             g_VirtualScene["cube_faces"].rendering_mode, // Veja slides 182-188 do documento Aula_04_Modelagem_Geometrica_3D.pdf
             g_VirtualScene["cube_faces"].num_indices,
@@ -565,26 +542,7 @@ int main()
             (void*)g_VirtualScene["cube_faces"].first_index
         );
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         //-------------------------------------- cubo jogador --------------------------------------------------//
-
-        //---------------------------------------esfera--------------------------------------------------------//
-        t=(1+sin(t))/2;
-        // Desenhamos o modelo da esfera
-        glm::vec4 translator = FindPoint(t);
-
-        model = Matrix_Translate(translator.x + 6.0f, translator.y + 0.4, translator.z - 1.0f);
-        glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-
-        glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
-        glBindTexture(GL_TEXTURE_2D, SphereTexture);
-        glDrawElements(
-            g_VirtualScene["esfera_vermelha"].rendering_mode,
-            g_VirtualScene["esfera_vermelha"].num_indices,
-            GL_UNSIGNED_INT,
-            (void*)(g_VirtualScene["esfera_vermelha"].first_index * sizeof(GLuint))
-        );
-        //---------------------------------------esfera--------------------------------------------------------//
 
         //---------------------------------------gatinho-------------------------------------------------------//
         model =  Matrix_Translate(-5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f)  * Matrix_Rotate_Y(6.3f*t);
@@ -1378,10 +1336,10 @@ void ErrorCallback(int error, const char* description)
     fprintf(stderr, "ERROR: GLFW: %s\n", description);
 }
 
-// Carregamento de imagens (textura) formato TGA 128x128
+// Carregamento de imagens (textura) formato BMP
+// Inspirado no tutorial https://www.opengl-tutorial.org/beginners-tutorials/tutorial-5-a-textured-cube/
 GLuint Load_Texture_BMP(const char *file_path)
 {
-
     // Cria uma textura OpenGL
     GLuint textureID;
     glGenTextures(1, &textureID);
@@ -1391,9 +1349,9 @@ GLuint Load_Texture_BMP(const char *file_path)
 
     // ### Leitura do arquivo ###
     unsigned char header[54];   // Todo arquivo BMP começa com um cabeçalho de 54 bytes
-    unsigned int dataPos;       // Posição em que começa o payload da imagem
+    unsigned int payload_start; // Posição em que começa o payload da imagem
     unsigned int width, height;
-    unsigned int imageSize;     // = width*height*3
+    unsigned int size;          // = width*height*3
     unsigned char *data;        // Valores RGB
     FILE *file = fopen(file_path, "rb");
     if (!file)
@@ -1402,7 +1360,7 @@ GLuint Load_Texture_BMP(const char *file_path)
         return 0;
     }
     if (fread(header, 1, 54, file) != 54)
-    { // If não tiver lido 54 bytes, o arquivo está malformado.
+    { // Se não tiver lido 54 bytes, o arquivo está malformado.
         printf("O arquivo para textura esta errado.\n");
         return false;
     }
@@ -1412,19 +1370,19 @@ GLuint Load_Texture_BMP(const char *file_path)
         return 0;
     }
     // Leitura dos metadados
-    dataPos = *(int *)&(header[0x0A]);
-    imageSize = *(int *)&(header[0x22]);
+    payload_start = *(int *)&(header[0x0A]);
+    size = *(int *)&(header[0x22]);
     width = *(int *)&(header[0x12]);
     height = *(int *)&(header[0x16]);
     // Preenchendo informações que faltam, se o arquivo BMP não forneceu corretamente
-    if (imageSize == 0)
-        imageSize = width * height * 3; // 3 : Red, Green, Blue
-    if (dataPos == 0)
-        dataPos = 54; // Porque sim. (especificação do formato BMP)
+    if (size == 0)
+        size = width * height * 3; // 3 : Red, Green, Blue
+    if (payload_start == 0)
+        payload_start = 54; // Porque sim. (especificação do formato BMP)
     // Criar o buffer para leitura do payload
-    data = new unsigned char[imageSize];
+    data = new unsigned char[size];
     // Leitura do arquivo para o buffer
-    fread(data, 1, imageSize, file);
+    fread(data, 1, size, file);
     // Fechar o arquivo original
     fclose(file);
     // ### Fim da leitura do arquivo ###
@@ -1441,20 +1399,6 @@ GLuint Load_Texture_BMP(const char *file_path)
 
     // Retorna o ID da textura
     return textureID;
-}
-
-// Mostra ajuda na tela
-void TextRendering_ShowHelp(GLFWwindow* window)
-{
-    if ( !g_ShowInfoText )
-        return;
-
-    float pad = TextRendering_LineHeight(window);
-
-    char buffer[80];
-    snprintf(buffer, 80, "Movimento do cubo: SETAS | Toggle free-look: L | Movimento free-look: WASD\n");
-
-    TextRendering_PrintString(window, buffer, -1.0f+pad/10, -1.0f+2*pad/10, 1.0f);
 }
 
 // Mostra mensagem de que o jogador morreu!
@@ -1560,7 +1504,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
 
     std::vector<GLuint> indices;
     std::vector<float>  model_coefficients;
-    std::vector<float>  normal_coefficients;
     std::vector<float>  texture_coefficients;
 
     for (size_t shape = 0; shape < model->shapes.size(); ++shape)
@@ -1586,22 +1529,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
                 model_coefficients.push_back( vy ); // Y
                 model_coefficients.push_back( vz ); // Z
                 model_coefficients.push_back( 1.0f ); // W
-
-                // Inspecionando o código da tinyobjloader, o aluno Bernardo
-                // Sulzbach (2017/1) apontou que a maneira correta de testar se
-                // existem normais e coordenadas de textura no ObjModel é
-                // comparando se o índice retornado é -1. Fazemos isso abaixo.
-
-                if ( idx.normal_index != -1 )
-                {
-                    const float nx = model->attrib.normals[3*idx.normal_index + 0];
-                    const float ny = model->attrib.normals[3*idx.normal_index + 1];
-                    const float nz = model->attrib.normals[3*idx.normal_index + 2];
-                    normal_coefficients.push_back( nx ); // X
-                    normal_coefficients.push_back( ny ); // Y
-                    normal_coefficients.push_back( nz ); // Z
-                    normal_coefficients.push_back( 0.0f ); // W
-                }
 
                 if ( idx.texcoord_index != -1 )
                 {
@@ -1636,20 +1563,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
     glEnableVertexAttribArray(location);
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 
-    if ( !normal_coefficients.empty() )
-    {
-        GLuint VBO_normal_coefficients_id;
-        glGenBuffers(1, &VBO_normal_coefficients_id);
-        glBindBuffer(GL_ARRAY_BUFFER, VBO_normal_coefficients_id);
-        glBufferData(GL_ARRAY_BUFFER, normal_coefficients.size() * sizeof(float), NULL, GL_STATIC_DRAW);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, normal_coefficients.size() * sizeof(float), normal_coefficients.data());
-        location = 2; // "(location = 2)" em "shader_vertex.glsl"
-        number_of_dimensions = 4; // vec4 em "shader_vertex.glsl"
-        glVertexAttribPointer(location, number_of_dimensions, GL_FLOAT, GL_FALSE, 0, 0);
-        glEnableVertexAttribArray(location);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-    }
-
     if ( !texture_coefficients.empty() )
     {
         GLuint VBO_texture_coefficients_id;
@@ -1671,8 +1584,6 @@ void BuildTrianglesAndAddToVirtualScene(ObjModel* model)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indices_id);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(GLuint), NULL, GL_STATIC_DRAW);
     glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, 0, indices.size() * sizeof(GLuint), indices.data());
-    // glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0); // XXX Errado!
-    //
 
     // "Desligamos" o VAO, evitando assim que operações posteriores venham a
     // alterar o mesmo. Isso evita bugs.
