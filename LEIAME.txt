@@ -1,0 +1,6 @@
+=== Windows 10 x64
+===================================
+Para compilar e executar este projeto no Windows, baixe a IDE Code::Blocks em
+http://codeblocks.org/ e abra o arquivo "BODE_BLOCKS.cbp".
+
+Requer Code::Blocks versão 20.03 ou superior.
