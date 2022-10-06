@@ -304,7 +304,7 @@ int main()
     GLuint SphereTexture = Load_Texture_BMP("marble_texture_2.bmp");
     GLuint SkyTexture = Load_Texture_BMP("sky_texture.bmp");
     GLuint CatTexture = Load_Texture_BMP("cat_texture.bmp");
-
+    GLuint CatTexture2 = Load_Texture_BMP("cat_texture_2.bmp");
 
     // Buscamos o endereço das variáveis definidas dentro do Vertex Shader.
     // Utilizaremos estas variáveis para enviar dados para a placa de vídeo
@@ -455,56 +455,56 @@ int main()
             // slides 2-14 e 184-190 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
             glm::mat4 model;
 
-            if      (i == 1)    { model = Matrix_Translate(0.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 2)    { model = Matrix_Translate(1.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 3)    { model = Matrix_Translate(2.0f, -0.1f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            if      (i == 1)    { model = Matrix_Translate(0.0f, -0.11f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 2)    { model = Matrix_Translate(1.0f, -0.11f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 3)    { model = Matrix_Translate(2.0f, -0.11f, 0.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 4)    { model = Matrix_Translate(0.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 5)    { model = Matrix_Translate(1.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 6)    { model = Matrix_Translate(2.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 4)    { model = Matrix_Translate(0.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 5)    { model = Matrix_Translate(1.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 6)    { model = Matrix_Translate(2.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 7)    { model = Matrix_Translate(0.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 8)    { model = Matrix_Translate(1.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 9)    { model = Matrix_Translate(2.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 7)    { model = Matrix_Translate(0.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 8)    { model = Matrix_Translate(1.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 9)    { model = Matrix_Translate(2.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 10)   { model = Matrix_Translate(1.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 11)   { model = Matrix_Translate(2.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-
-            else if (i == 12)   { model = Matrix_Translate(3.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 13)   { model = Matrix_Translate(4.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 14)   { model = Matrix_Translate(5.0f, -0.1f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 15)   { model = Matrix_Translate(3.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 16)   { model = Matrix_Translate(4.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 17)   { model = Matrix_Translate(5.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 18)   { model = Matrix_Translate(3.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 19)   { model = Matrix_Translate(4.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 20)   { model = Matrix_Translate(5.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-
-            else if (i == 21)   { model = Matrix_Translate(5.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 10)   { model = Matrix_Translate(1.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 11)   { model = Matrix_Translate(2.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
-            else if (i == 22)   { model = Matrix_Translate(6.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 23)   { model = Matrix_Translate(7.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 24)   { model = Matrix_Translate(8.0f, -0.1f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 12)   { model = Matrix_Translate(3.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 13)   { model = Matrix_Translate(4.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 14)   { model = Matrix_Translate(5.0f, -0.11f, 1.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 25)   { model = Matrix_Translate(6.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 26)   { model = Matrix_Translate(7.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 27)   { model = Matrix_Translate(8.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 15)   { model = Matrix_Translate(3.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 16)   { model = Matrix_Translate(4.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 17)   { model = Matrix_Translate(5.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 28)   { model = Matrix_Translate(6.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 29)   { model = Matrix_Translate(7.0f, -0.1f, 4.0f) * Matrix_Scale(0.95f, 0.2f, 0.95f); }
-            else if (i == 30)   { model = Matrix_Translate(8.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 18)   { model = Matrix_Translate(3.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 19)   { model = Matrix_Translate(4.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 20)   { model = Matrix_Translate(5.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
-            else if (i == 31)   { model = Matrix_Translate(6.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 32)   { model = Matrix_Translate(7.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 33)   { model = Matrix_Translate(8.0f, -0.1f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 21)   { model = Matrix_Translate(5.0f, -0.11f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
-            else if (i == 34)   { model = Matrix_Translate(9.0f, -0.1f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
-            else if (i == 35)   { model = Matrix_Translate(9.0f, -0.1f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 22)   { model = Matrix_Translate(6.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 23)   { model = Matrix_Translate(7.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 24)   { model = Matrix_Translate(8.0f, -0.11f, 2.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 25)   { model = Matrix_Translate(6.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 26)   { model = Matrix_Translate(7.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 27)   { model = Matrix_Translate(8.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 28)   { model = Matrix_Translate(6.0f, -0.11f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 29)   { model = Matrix_Translate(7.0f, -0.11f, 4.0f) * Matrix_Scale(0.95f, 0.2f, 0.95f); }
+            else if (i == 30)   { model = Matrix_Translate(8.0f, -0.11f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+            else if (i == 31)   { model = Matrix_Translate(6.0f, -0.11f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 32)   { model = Matrix_Translate(7.0f, -0.11f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 33)   { model = Matrix_Translate(8.0f, -0.11f, 5.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+
+
+            else if (i == 34)   { model = Matrix_Translate(9.0f, -0.11f, 3.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
+            else if (i == 35)   { model = Matrix_Translate(9.0f, -0.11f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
             // Enviamos a matriz "model" para a placa de vídeo (GPU). Veja o
@@ -556,6 +556,7 @@ int main()
             show_fail = true;
         }
 
+        glBlendFunc(GL_DST_ALPHA, GL_DST_ALPHA);
         glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, PlayerTexture);
         glDrawElements(
@@ -564,6 +565,8 @@ int main()
             GL_UNSIGNED_INT,
             (void*)g_VirtualScene["cube_faces"].first_index
         );
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         //-------------------------------------- cubo jogador --------------------------------------------------//
 
         //---------------------------------------esfera--------------------------------------------------------//
@@ -574,10 +577,6 @@ int main()
         model = Matrix_Translate(translator.x + 6.0f, translator.y + 0.4, translator.z - 1.0f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
 
-        //glBlendFunc(GL_CONSTANT_ALPHA, GL_DST_ALPHA);
-        //glBlendEquation(GL_MAX);
-        //glBlendColor(1.000, 0.012, 0.012, 0.200);
-
         glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
         glBindTexture(GL_TEXTURE_2D, SphereTexture);
         glDrawElements(
@@ -586,20 +585,11 @@ int main()
             GL_UNSIGNED_INT,
             (void*)(g_VirtualScene["esfera_vermelha"].first_index * sizeof(GLuint))
         );
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_ADD);
-
         //---------------------------------------esfera--------------------------------------------------------//
 
         //---------------------------------------gatinho-------------------------------------------------------//
-        model =  Matrix_Translate(-5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f)  * Matrix_Rotate_Y(8*t);
+        model =  Matrix_Translate(-5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f)  * Matrix_Rotate_Y(6.3f*t);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
-
-        //glBlendFunc(GL_CONSTANT_ALPHA, GL_DST_ALPHA);
-        //glBlendEquation(GL_MAX);
-        //glBlendColor(1.000, 0.012, 0.012, 0.200);
-
         glBindVertexArray(g_VirtualScene["cat"].vertex_array_object_id);
         glBindTexture(GL_TEXTURE_2D, CatTexture);
         glDrawElements(
@@ -609,8 +599,10 @@ int main()
             (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
         );
 
-        model =  Matrix_Translate(5.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(-8*t);
+        model =   Matrix_Translate(translator.x * 2.0f, 0.0f, translator.z)
+                * Matrix_Translate(-1.5f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(-6.3f*t);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glBindTexture(GL_TEXTURE_2D, CatTexture2);
         glDrawElements(
             g_VirtualScene["cat"].rendering_mode,
             g_VirtualScene["cat"].num_indices,
@@ -618,17 +610,15 @@ int main()
             (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
         );
 
-        model =  Matrix_Translate(15.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(t*8);
+        model =  Matrix_Translate(15.0f, 3.0f, -5.0f)  * Matrix_Scale(0.1f, 0.1f, 0.1f) * Matrix_Rotate_Y(6.3f*t);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
+        glBindTexture(GL_TEXTURE_2D, CatTexture);
         glDrawElements(
             g_VirtualScene["cat"].rendering_mode,
             g_VirtualScene["cat"].num_indices,
             GL_UNSIGNED_INT,
             (void*)(g_VirtualScene["cat"].first_index * sizeof(GLuint))
         );
-
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        glBlendEquation(GL_FUNC_ADD);
         //---------------------------------------gatinho-------------------------------------------------------//
 
         // "Desligamos" o VAO, evitando assim que operações posteriores venham a
