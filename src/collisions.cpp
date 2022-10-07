@@ -1,9 +1,13 @@
+#include "collisions.h"
 extern int block_position;
 extern float g_PositionX;
 extern float g_PositionZ;
 extern float g_PositionY;
+float sphere_position_x;
+float sphere_position_y;
+float sphere_position_z;
 
-bool death_collision(float x, float y, float z)
+bool death_collision()
 {
     if (block_position == 1) {
         // Bloco está de pé
@@ -33,6 +37,16 @@ bool death_collision(float x, float y, float z)
         if (g_PositionZ == 4 && g_PositionX >= 5.5 && g_PositionX <= 8.5) return false;
         if (g_PositionZ == 5 && g_PositionX >= 6.5 && g_PositionX <= 7.5) return false;
     } 
-    
     return true;
 }
+
+
+bool sphere_colision(float sphere_position_x, float sphere_position_z){
+
+    if((abs(sphere_position_x - g_PositionX) <= 1.5) && (abs(sphere_position_z - g_PositionZ)<= 1.5))
+        return true;
+
+    else return false;
+}
+
+

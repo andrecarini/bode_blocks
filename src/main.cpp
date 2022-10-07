@@ -6,7 +6,7 @@
 //               Prof. Eduardo Gastal
 //
 //                   Projeto Final
-//  
+//
 //                BODE_BLOCKS THE GAME
 //               287711 - Aline Machado
 //               260843 - Andre Carini
@@ -27,6 +27,7 @@
 #include <stdexcept>
 #include <algorithm>
 #include <iostream>
+#include <stdlib.h>
 
 // Headers das bibliotecas OpenGL
 #include <glad/glad.h>   // Criação de contexto OpenGL 3.3
@@ -141,13 +142,20 @@ std::map<std::string, SceneObject> g_VirtualScene;
 // Razão de proporção da janela (largura/altura). Veja função FramebufferSizeCallback().
 float g_ScreenRatio = 1.0f;
 
-// Ângulos de Euler que controlam a rotação de um dos cubos da cena virtual
+// Ângulos de Euler que controlam a rotação do jogador na cena virtual
 float g_AngleX     = 0.0f;
 float g_AngleY     = 0.0f;
 float g_AngleZ     = 0.0f;
+// Posicionamento do jogador na cena virtual
 float g_PositionX  = 0.0f;
 float g_PositionZ  = 0.0f;
 float g_PositionY  = 0.0f;
+//Posicionamento da esfera na cena virtual
+float g_sphere_position_x = 0.0f;
+float g_sphere_position_y = 0.0f;
+float g_sphere_position_z = 0.0f;
+
+
 int block_position = 1.0f;
 
 // "g_LeftMouseButtonPressed = true" se o usuário está com o botão esquerdo do mouse
@@ -307,8 +315,8 @@ int main()
         if (time_since_last_fail > 4) {
             show_fail = false;
         }
-        
-        
+
+
         // Aqui executamos as operações de renderização
 
         // Definimos a cor do "fundo" do framebuffer como branco.  Tal cor é
@@ -477,7 +485,7 @@ int main()
             else if (i == 35)   { model = Matrix_Translate(9.0f, -0.11f, 4.0f) * Matrix_Scale(1.0f, 0.2f, 1.0f); }
 
 
-           
+
             glUniformMatrix4fv(model_uniform, 1, GL_FALSE, glm::value_ptr(model));
 
 
@@ -496,8 +504,11 @@ int main()
         //---------------------------------------esfera inimiga--------------------------------------------------------//
         t=(1+sin(t))/2;
         glm::vec4 translator = FindPoint(t);
+        g_sphere_position_x = 4.0f;
+        g_sphere_position_y = 0.7f;
+        g_sphere_position_z = 2 * translator.z - 3.0f;
 
-        glm::mat4 model = Matrix_Translate(4.0f, 0.7f, 2 * translator.z - 3.0f) * Matrix_Scale(0.5f, 0.5f, 0.5f);
+        glm::mat4 model = Matrix_Translate(g_sphere_position_x,g_sphere_position_y,g_sphere_position_z) * Matrix_Scale(0.5f, 0.5f, 0.5f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, SphereTexture);
         glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
@@ -506,6 +517,7 @@ int main()
             g_VirtualScene["esfera_vermelha"].num_indices,
             GL_UNSIGNED_INT,
             (void *)g_VirtualScene["cube_faces"].first_index);
+
         //---------------------------------------esfera inimiga--------------------------------------------------------//
 
         //-------------------------------------- cubo jogador --------------------------------------------------//
@@ -516,7 +528,8 @@ int main()
                         * Matrix_Rotate_X(g_AngleX)
                         * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
-        if( death_collision(g_PositionX, g_PositionY, g_PositionZ) ) {
+
+        if(death_collision()) {
             g_PositionX = 0.0f;
             g_PositionY = 0.0f;
             g_PositionZ = 0.0f;
@@ -527,6 +540,12 @@ int main()
 
             last_fail = glfwGetTime();
             show_fail = true;
+        }
+
+        if(sphere_colision(g_sphere_position_x, 2 * translator.z - 3.0f)){
+            last_fail = glfwGetTime();
+            show_fail = true;
+        
         }
 
         glBlendFunc(GL_DST_ALPHA, GL_DST_ALPHA);
@@ -540,6 +559,7 @@ int main()
             (void*)g_VirtualScene["cube_faces"].first_index
         );
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
         //-------------------------------------- cubo jogador --------------------------------------------------//
 
         //---------------------------------------gatinho-------------------------------------------------------//
@@ -612,6 +632,8 @@ int main()
         // definidas anteriormente usando glfwSet*Callback() serão chamadas
         // pela biblioteca GLFW.
         glfwPollEvents();
+
+
     }
 
     // Finalizamos o uso dos recursos do sistema operacional
@@ -627,37 +649,37 @@ GLuint BuildSceneryCube()
     // Geometria: conjunto de vértices.
     GLfloat model_coefficients[] = {
         //    X      Y      Z     W
-                                      // face 0 
+                                      // face 0
            0.0f,  0.0f,  0.0f,  1.0f, // vértice 0
            1.0f,  0.0f,  0.0f,  1.0f, // vértice 1
            0.0f,  1.0f,  0.0f,  1.0f, // vértice 2
            1.0f,  1.0f,  0.0f,  1.0f, // vértice 3
 
-                                      // face 1 
+                                      // face 1
            0.0f,  0.0f,  1.0f,  1.0f, // vértice 4
            0.0f,  0.0f,  0.0f,  1.0f, // vértice 5
            0.0f,  1.0f,  1.0f,  1.0f, // vértice 6
            0.0f,  1.0f,  0.0f,  1.0f, // vértice 7
 
-                                      // face 2 
+                                      // face 2
            1.0f,  0.0f,  1.0f,  1.0f, // vértice 8
            0.0f,  0.0f,  1.0f,  1.0f, // vértice 9
            1.0f,  1.0f,  1.0f,  1.0f, // vértice 10
            0.0f,  1.0f,  1.0f,  1.0f, // vértice 11
 
-                                      // face 3 
+                                      // face 3
            1.0f,  0.0f,  0.0f,  1.0f, // vértice 12
            1.0f,  0.0f,  1.0f,  1.0f, // vértice 13
            1.0f,  1.0f,  0.0f,  1.0f, // vértice 14
            1.0f,  1.0f,  1.0f,  1.0f, // vértice 15
 
-                                      // face 4 
+                                      // face 4
            0.0f,  0.0f,  1.0f,  1.0f, // vértice 16
            1.0f,  0.0f,  1.0f,  1.0f, // vértice 17
            0.0f,  0.0f,  0.0f,  1.0f, // vértice 18
            1.0f,  0.0f,  0.0f,  1.0f, // vértice 19
 
-                                      // face 5 
+                                      // face 5
            0.0f,  1.0f,  1.0f,  1.0f, // vértice 20
            1.0f,  1.0f,  1.0f,  1.0f, // vértice 21
            0.0f,  1.0f,  0.0f,  1.0f, // vértice 22
@@ -694,13 +716,13 @@ GLuint BuildSceneryCube()
             1.0f,   0.0f, // coordenada UV  5
             0.0f,   1.0f, // coordenada UV  6
             1.0f,   1.0f, // coordenada UV  7
-                          
+
                           // face 2
             0.0f,   0.0f, // coordenada UV  8
             1.0f,   0.0f, // coordenada UV  9
             0.0f,   1.0f, // coordenada UV  10
             1.0f,   1.0f, // coordenada UV  11
-                          
+
                           // face 3
             0.0f,   0.0f, // coordenada UV  12
             1.0f,   0.0f, // coordenada UV  13
@@ -741,7 +763,7 @@ GLuint BuildSceneryCube()
                  // face 1
         4, 5, 6, // triângulo 2
         5, 6, 7, // triângulo 3
-                 
+
                     // face 2
         8, 9,  10,  // triângulo 4
         9, 10, 11,  // triângulo 5
@@ -1426,6 +1448,7 @@ void TextRendering_ShowVictory(GLFWwindow *window)
 
     TextRendering_PrintString(window, buffer, -0.5f + pad / 10, 2 * pad / 10, 3.0f);
 }
+
 
 // Escrevemos na tela qual matriz de projeção está sendo utilizada.
 void TextRendering_ShowProjection(GLFWwindow* window)
