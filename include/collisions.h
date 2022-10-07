@@ -6,9 +6,11 @@ extern int block_position;
 extern float g_PositionX;
 extern float g_PositionZ;
 extern float g_PositionY;
+extern float g_sphere_position_x;
+extern float g_sphere_position_z;
 
-bool death_collision();
-bool sphere_colision(float sphere_position_x, float sphere_position_z);
-
+bool plane_collision();
+bool sphere_collision();
+bool victory_cube_collision();
 
 #endif

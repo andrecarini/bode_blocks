@@ -306,9 +306,10 @@ int main()
     float start=glfwGetTime();
     float last_fail=glfwGetTime();
     bool show_fail = false;
+    bool show_victory = true;
 
-    // Ficamos em loop, renderizando, até que o usuário feche a janela
-    while (!glfwWindowShouldClose(window))
+        // Ficamos em loop, renderizando, até que o usuário feche a janela
+        while (!glfwWindowShouldClose(window))
     {
         float t=glfwGetTime()-start;
         float time_since_last_fail = glfwGetTime()-last_fail;
@@ -508,7 +509,7 @@ int main()
         g_sphere_position_y = 0.7f;
         g_sphere_position_z = 2 * translator.z - 3.0f;
 
-        glm::mat4 model = Matrix_Translate(g_sphere_position_x,g_sphere_position_y,g_sphere_position_z) * Matrix_Scale(0.5f, 0.5f, 0.5f);
+        glm::mat4 model = Matrix_Translate(g_sphere_position_x,g_sphere_position_y,g_sphere_position_z) * Matrix_Scale(0.38f, 0.38f, 0.38f);
         glUniformMatrix4fv(model_uniform, 1 , GL_FALSE , glm::value_ptr(model));
         glBindTexture(GL_TEXTURE_2D, SphereTexture);
         glBindVertexArray(g_VirtualScene["esfera_vermelha"].vertex_array_object_id);
@@ -528,8 +529,8 @@ int main()
                         * Matrix_Rotate_X(g_AngleX)
                         * Matrix_Scale(1.0f, 2.0f, 1.0f);
 
-
-        if(death_collision()) {
+        if (plane_collision() || sphere_collision())
+        {
             g_PositionX = 0.0f;
             g_PositionY = 0.0f;
             g_PositionZ = 0.0f;
@@ -542,10 +543,10 @@ int main()
             show_fail = true;
         }
 
-        if(sphere_colision(g_sphere_position_x, 2 * translator.z - 3.0f)){
-            last_fail = glfwGetTime();
-            show_fail = true;
-        
+        if (victory_cube_collision()) {
+            show_victory = true;
+        } else {
+            show_victory = false;
         }
 
         glBlendFunc(GL_DST_ALPHA, GL_DST_ALPHA);
@@ -559,7 +560,6 @@ int main()
             (void*)g_VirtualScene["cube_faces"].first_index
         );
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
         //-------------------------------------- cubo jogador --------------------------------------------------//
 
         //---------------------------------------gatinho-------------------------------------------------------//
@@ -607,7 +607,7 @@ int main()
             TextRendering_ShowFail(window);
         }
 
-        if (block_position == 1.0f && g_PositionX == 7.0f && g_PositionZ == 4.0f)
+        if ( show_victory )
         {
             TextRendering_ShowVictory(window);
         }
@@ -1430,7 +1430,7 @@ void TextRendering_ShowFail(GLFWwindow *window)
     float pad = TextRendering_LineHeight(window);
 
     char buffer[80];
-    snprintf(buffer, 80, "Seu bloco caiu! Tente novamente!\n");
+    snprintf(buffer, 80, "Morreu! Tente novamente!\n");
 
     TextRendering_PrintString(window, buffer, -0.5f + pad / 10, 2 * pad / 10, 3.0f);
 }
