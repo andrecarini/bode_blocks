@@ -168,7 +168,7 @@ bool g_LeftMouseButtonPressed = false;
 // renderização.
 float g_CameraTheta = 0.0f; // Ângulo no plano ZX em relação ao eixo Z
 float g_CameraPhi = 0.0f;   // Ângulo em relação ao eixo Y
-float g_CameraDistance = 2.5f; // Distância da câmera para a origem
+float g_CameraDistance = 10.5f; // Distância da câmera para a origem
 
 // Variável que controla o tipo de projeção utilizada: perspectiva ou ortográfica.
 bool g_UsePerspectiveProjection = true;
@@ -181,6 +181,8 @@ bool g_MoveForward = false;
 bool g_MoveBackward = false;
 bool g_MoveLeft = false;
 bool g_MoveRight = false;
+
+bool g_CameraFreelook = true;
 
 // Tempo
 double g_LastTime = glfwGetTime();
@@ -308,8 +310,8 @@ int main()
     bool show_fail = false;
     bool show_victory = true;
 
-        // Ficamos em loop, renderizando, até que o usuário feche a janela
-        while (!glfwWindowShouldClose(window))
+    // Ficamos em loop, renderizando, até que o usuário feche a janela
+    while (!glfwWindowShouldClose(window))
     {
         float t=glfwGetTime()-start;
         float time_since_last_fail = glfwGetTime()-last_fail;
@@ -336,29 +338,38 @@ int main()
         // os shaders de vértice e fragmentos).
         glUseProgram(program_id);
 
-        // Computamos a posição da câmera utilizando coordenadas esféricas.  As
-        // variáveis g_CameraDistance, g_CameraPhi, e g_CameraTheta são
-        // controladas pelo mouse do usuário. Veja as funções CursorPosCallback()
-        // e ScrollCallback().
-        float x = cos(g_CameraPhi) * sin(g_CameraTheta);
-        float y = sin(g_CameraPhi);
-        float z = cos(g_CameraPhi) * cos(g_CameraTheta);
-
-        // Abaixo definimos as varáveis que efetivamente definem a câmera virtual.
-        // Veja slides 195-227 e 229-234 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
-		// Já está modificado para free camera look around.
-        glm::vec4 camera_up_vector = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-        glm::vec4 camera_view_vector = glm::vec4(-x, -y, -z, 0.0f);
-        camera_view_vector /= norm(camera_view_vector);
+        glm::vec4 camera_view_vector;
+        glm::vec4 camera_up_vector;
+        glm::vec4 camera_lookat_l;
 
         float speed = 2.0f * (float)(glfwGetTime() - g_LastTime);
         g_LastTime = glfwGetTime();
 
-        if (g_MoveForward)      { camera_position_c += speed * camera_view_vector; }
-        if (g_MoveLeft)         { camera_position_c -= speed * crossproduct(camera_view_vector, camera_up_vector); }
-        if (g_MoveBackward)     { camera_position_c -= speed * camera_view_vector; }
-        if (g_MoveRight)        { camera_position_c += speed * crossproduct(camera_view_vector, camera_up_vector); }
+        if (g_CameraFreelook == true) {
+            float x = cos(g_CameraPhi) * sin(g_CameraTheta);
+            float y = sin(g_CameraPhi);
+            float z = cos(g_CameraPhi) * cos(g_CameraTheta);
 
+            camera_up_vector = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
+            camera_view_vector = glm::vec4(-x, -y, -z, 0.0f);
+            camera_view_vector /= norm(camera_view_vector);
+
+            if (g_MoveForward)      { camera_position_c += speed * camera_view_vector; }
+            if (g_MoveLeft)         { camera_position_c -= speed * crossproduct(camera_view_vector, camera_up_vector); }
+            if (g_MoveBackward)     { camera_position_c -= speed * camera_view_vector; }
+            if (g_MoveRight)        { camera_position_c += speed * crossproduct(camera_view_vector, camera_up_vector); }
+
+        } else {
+            float r = g_CameraDistance;
+            float x = r * cos(g_CameraPhi) * sin(g_CameraTheta);
+            float y = r * sin(g_CameraPhi);
+            float z = r * cos(g_CameraPhi) * cos(g_CameraTheta);
+
+            camera_position_c = glm::vec4(x+5.0f, y+1.0f, z+3.0f, 1.0f);             // Ponto "c", centro da câmera
+            camera_lookat_l = glm::vec4(5.0f, 1.0f, 3.0f, 1.0f);      // Ponto "l", para onde a câmera (look-at) estará sempre olhando
+            camera_view_vector = camera_lookat_l - camera_position_c; // Vetor "view", sentido para onde a câmera está virada
+            camera_up_vector = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);     // Vetor "up" fixado para apontar para o "céu" (eito Y global)
+        }
 
         // Computamos a matriz "View" utilizando os parâmetros da câmera para
         // definir o sistema de coordenadas da câmera.  Veja slides 2-14, 184-190 e 236-242 do documento Aula_08_Sistemas_de_Coordenadas.pdf.
@@ -1266,7 +1277,13 @@ void KeyCallback(GLFWwindow* window, int key, int scancode, int action, int mod)
         g_ShowInfoText = !g_ShowInfoText;
     }
 
-	// WASD movimentação da camera.
+    if (key == GLFW_KEY_L && action == GLFW_PRESS)
+    {
+        if (g_CameraFreelook == false) g_CameraFreelook = true;
+        else g_CameraFreelook = false;
+    }
+
+    // WASD movimentação da camera.
     if (key == GLFW_KEY_W && action == GLFW_PRESS) { g_MoveForward = true; }
 	if (key == GLFW_KEY_W && action == GLFW_RELEASE) { g_MoveForward = false; }
 
